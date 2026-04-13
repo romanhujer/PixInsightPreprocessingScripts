@@ -57,5 +57,13 @@ Object_Name/
             ├── Flat/ (Copied/Rozkopírované)
             └── Dark/ (Symlinks to !Master_Standard)
 
-            
-            
+
+---
+
+## ⚖️ License & Disclaimer / Licence a záruka
+
+**[CZ] Varování:** Tento skript provádí přesuny a mazání souborů. Autor nenese žádnou odpovědnost za případnou ztrátu nebo poškození dat způsobené používáním tohoto softwaru. Používejte na vlastní nebezpečí a vždy mějte data zálohovaná.
+Licencováno pod **GNU GPLv3**.
+
+**[EN] Disclaimer:** This script performs file moves and deletions. The author assumes no responsibility for any data loss or damage caused by using this software. Use at your own risk and always keep your data backed up.
+Licensed under **GNU GPLv3**.            
