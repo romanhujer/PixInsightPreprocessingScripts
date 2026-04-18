@@ -3,100 +3,145 @@
 
 import os
 import shutil
+import glob
+import re
+from datetime import datetime, timedelta
 
-# --- KONFIGURACE ---
-DRY_RUN = True  # True = simulace | False = ostré mazání
+VERSION="1.0.2"
+# --- KONFIGURACE KNIHOVNY ---
+LIB_ROOT = os.path.abspath("!Master_Standard")
 
-PROTECTED_NAMES = ["master", "final"]
-JUNK_FOLDERS = ["debayered", "weights", "logs"]
-# .xisf, .tif, .jpg atd. jsou v kořeni projektu NEDOTKNUTELNÉ
-KEEP_EXTENSIONS = [".tif", ".tiff", ".jpg", ".jpeg", ".png", ".xisf"]
+CAMERA_MAP = {
+    "2600MC": "ASI2600MC/G300_-10C",
+    "2600MM": "ASI2600MM/G300_-10C",
+    "1600MM": {"cold": "ASI1600MM/G0_-20C", "warm": "ASI1600MM/G139_-15C"},
+    "294MC":  {"cold": "ASI294MC/G120_-20C", "warm": "ASI294MC/G120_0C"},
+    "178MC":  "ASI178MC/G0_0C",
+    "Dwarf3_Wide": None,
+    "Dwarf3_Tele": None
+}
 
-def has_data(path):
-    if not os.path.isdir(path): return False
-    for root, _, files in os.walk(path):
-        if any(f.lower().endswith(('.xisf', '.fit', '.fits')) for f in files):
-            return True
-    return False
+class Color:
+    BLUE = '\033[94m'
+    GREEN = '\033[92m'
+    YELLOW = '\033[93m'
+    RED = '\033[91m'
+    BOLD = '\033[1m'
+    END = '\033[0m'
 
-def safe_delete_folder(path):
-    """Smaže složku, pokud neobsahuje chráněné soubory (TIF, XISF...)."""
-    keep_files = []
-    for root_dir, _, files in os.walk(path):
-        for f in files:
-            if any(f.lower().endswith(ext) for ext in KEEP_EXTENSIONS):
-                keep_files.append(os.path.join(root_dir, f))
+def get_observation_night(filepath):
+    fname = os.path.basename(filepath)
+    time_match = re.search(r'(\d{8})-(\d{6})', fname)
+    if time_match:
+        f_date = datetime.strptime(time_match.group(1), '%Y%m%d')
+        f_time = datetime.strptime(time_match.group(2), '%H%M%S').time()
+        if f_time.hour < 8:
+            f_date = f_date - timedelta(days=1)
+        return f_date.strftime('%m%d')
+    return datetime.fromtimestamp(os.path.getmtime(filepath)).strftime('%m%d')
+
+def get_info(filename):
+    if filename.lower().endswith('.jpg'): return None, None, None
+    parts = filename.split('_')
+    obj = "Unknown_Object"
+    if "Light" in parts or "Flat" in parts:
+        try:
+            start_idx = 1
+            # Hledáme prvek, který obsahuje informaci o expozici (např. 30.0s)
+            end_idx = next(i for i, s in enumerate(parts) if 's' in s and any(c.isdigit() for c in s))
+            obj = "_".join(parts[start_idx:end_idx])
+        except: pass
+    cam = next((k for k in CAMERA_MAP.keys() if k in filename), None)
+    temp_match = re.search(r'(-?\d+\.?\d*)C', filename)
+    temp = float(temp_match.group(1)) if temp_match else None
+    return obj, cam, temp
+
+def get_master_path(cam, temp):
+    cfg = CAMERA_MAP.get(cam)
+    if isinstance(cfg, dict):
+        if cam == "1600MM": return cfg["cold"] if temp and temp <= -19 else cfg["warm"]
+        if cam == "294MC": return cfg["warm"] if temp and temp > -5 else cfg["cold"]
+    return cfg
+
+def process():
+    print(f"{Color.BOLD}🚀 Startuji Astro Sorter...{Color.END}")
+
+    # --- ZMĚNA ZDE: Najdeme složky s datem kdekoli (v ASIAIR i jinde) ---
+    all_dirs = []
+    for root, dirs, files in os.walk('.'):
+        for d in dirs:
+            if re.match(r'20\d{2}-\d{2}-\d{2}', d):
+                all_dirs.append(os.path.join(root, d))
     
-    if keep_files:
-        print(f"  [POZOR] V {path} jsou chráněné soubory. Mažu jen .fit/.fits balast.")
-        if not DRY_RUN:
-            for root_dir, _, files in os.walk(path):
-                for f in files:
-                    if f.lower().endswith((".fit", ".fits")):
-                        try: os.remove(os.path.join(root_dir, f))
-                        except: pass
-    else:
-        print(f"  [SMAZAT SLOŽKU] {path}")
-        if not DRY_RUN:
-            try: shutil.rmtree(path)
-            except Exception as e: print(f"  [CHYBA] {e}")
+    # Odstraníme duplikáty a TAR archivy z cesty
+    source_dirs = [d for d in list(set(all_dirs)) if ".tar" not in d]
 
-def deep_clean_vault(target_path):
-    # --- BEZPEČNOSTNÍ KONTROLA CESTY ---
-    full_path = os.path.abspath(target_path)
-    if "astro" not in full_path.lower():
-        print(f"!!! BEZPEČNOSTNÍ CHYBA: Cesta '{full_path}' neobsahuje klíčové slovo 'Astro' !!!")
-        print("Skript se z bezpečnostních důvodů zastavil.")
+    if not source_dirs:
+        print(f"{Color.RED}❌ Žádná data k roztřídění nenalezena!{Color.END}")
         return
 
-    print(f"\n--- SPUŠTĚN BEZPEČNÝ ÚKLID (v2.2) ---")
-    print(f"Cíl: {full_path}")
-    
-    for root, dirs, files in os.walk(target_path):
-        path_lower = root.lower()
-        if any(f"/{name}" in path_lower or f"\\{name}" in path_lower for name in PROTECTED_NAMES):
-            continue
+    session_log = {}
 
-        # 1. Junk složky (logs, debayered...)
-        for junk in JUNK_FOLDERS:
-            if junk in dirs:
-                safe_delete_folder(os.path.join(root, junk))
+    # --- FÁZE 1: LIGHTY ---
+    for s_dir in source_dirs:
+        print(f"{Color.YELLOW}🔍 Prohledávám: {s_dir}{Color.END}")
+        files = []
+        for ext in ('**/*.fit', '**/*.fits', '**/*.xisf', '**/*.jpg'):
+            files.extend(glob.glob(os.path.join(s_dir, ext), recursive=True))
 
-        # 2. Logika mazání na základě hotových dat
-        has_m = has_data(os.path.join(root, "master"))
-        has_f = has_data(os.path.join(root, "final"))
-        has_cal = has_data(os.path.join(root, "calibrated"))
-        has_reg = has_data(os.path.join(root, "registered"))
-
-        # Mazání calibrated, pokud už je zaregistrováno
-        if has_reg and "calibrated" in dirs:
-            safe_delete_folder(os.path.join(root, "calibrated"))
-
-        # Mazání RAW FITů (pokud je hotovo/zkalibrováno)
-        if has_m or has_f or has_cal:
-            # Složky Flat/Light (jen pokud v nich nejsou TIF/XISF)
-            for d in list(dirs):
-                if d.lower() in ["light", "flat"]:
-                    safe_delete_folder(os.path.join(root, d))
+        for src in files:
+            if "stack" in src.lower(): continue
+            fname = os.path.basename(src)
             
-            # VOLNÉ .fit soubory v kořeni (Light* a Flat*)
-            for f in files:
-                f_low = f.lower()
-                # PŘÍSNÝ FILTR: musí začínat na Light/Flat A končit pouze .fit/.fits
-                if (f_low.startswith("light") or f_low.startswith("flat")) and \
-                   f_low.endswith((".fit", ".fits")):
-                    
-                    print(f"  [SMAZAT FIT SOUBOR] {f}")
-                    if not DRY_RUN:
-                        try: os.remove(os.path.join(root, f))
-                        except: pass
+            # Smazání JPG
+            if fname.lower().endswith('.jpg'):
+                try: os.remove(src)
+                except: pass
+                continue
+
+            obj, cam, temp = get_info(fname)
+            mmdd = get_observation_night(src)
+            
+            if not cam or not mmdd: continue
+
+            if "Light" in fname:
+                print(f"{Color.BLUE}📦 [Noc {mmdd}]{Color.END} Obj: {Color.BOLD}{obj}{Color.END} | Cam: {Color.YELLOW}{cam}{Color.END}")
+                dest_dir = os.path.join(obj, "Light", mmdd, f"ASI{cam}" if "Dwarf" not in cam else cam)
+                os.makedirs(dest_dir, exist_ok=True)
+                shutil.move(src, os.path.join(dest_dir, fname))
+                
+                key = (mmdd, cam)
+                if key not in session_log: session_log[key] = set()
+                session_log[key].add(obj)
+
+                # DARK LINK
+                master_sub = get_master_path(cam, temp)
+                if master_sub:
+                    dark_target = os.path.join(dest_dir, "Dark")
+                    if not os.path.exists(dark_target):
+                        os.makedirs(dark_target)
+                        full_lib = os.path.join(LIB_ROOT, master_sub)
+                        if os.path.exists(full_lib):
+                            for m in os.listdir(full_lib):
+                                try: os.symlink(os.path.join(full_lib, m), os.path.join(dark_target, m))
+                                except: pass
+
+    # --- FÁZE 2: FLATY ---
+    for s_dir in source_dirs:
+        flats = glob.glob(os.path.join(s_dir, "**/Flat_*.[fF][iI][tT]*"), recursive=True)
+        for f_src in flats:
+            fname = os.path.basename(f_src)
+            mmdd = get_observation_night(f_src)
+            _, cam, _ = get_info(fname)
+            if (mmdd, cam) in session_log:
+                for target_obj in session_log[(mmdd, cam)]:
+                    f_dest = os.path.join(target_obj, "Light", mmdd, f"ASI{cam}" if "Dwarf" not in cam else cam, "Flat")
+                    os.makedirs(f_dest, exist_ok=True)
+                    shutil.copy2(f_src, os.path.join(f_dest, fname))
+            try: os.remove(f_src)
+            except: pass
+
+    print(f"{Color.GREEN}{Color.BOLD}✅ HOTOVO!{Color.END}")
 
 if __name__ == "__main__":
-    u_input = input("Zadejte cestu (nebo '.'): ").strip()
-    target = os.getcwd() if u_input == "." else u_input.replace('\\ ', ' ')
-    
-    if os.path.exists(target):
-        deep_clean_vault(target)
-        if DRY_RUN: print("\n!!! SIMULACE HOTOVA (DRY_RUN=True) !!!")
-    else:
-        print("Cesta neexistuje!")
+    process()

@@ -1,0 +1,4465 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+********************************************************************
+PixInsight XML Process Serialization Module - XPSM 1.0
+********************************************************************
+Generated on 2025-07-05T05:45:12.188Z
+PixInsight Core 1.9.3 (x64)
+Copyright (c) 2003-2025 Pleiades Astrophoto
+********************************************************************
+-->
+<xpsm version="1.0" xmlns="http://www.pixinsight.com/xpsm" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.pixinsight.com/xpsm http://pixinsight.com/xpsm/xpsm-1.0.xsd">
+   <instance class="PixelMath" version="256" id="ModifiedSCNR_v5_instance">
+      <time start="2025-03-22T03:55:29.905Z" span="6.4665135"/>
+      <parameter id="expression">/*            Modified SCNR with Pixelmath -V5 
+      Pixelmath by Bill Blanshan - Concept by James Lamb       
+
+**Drag the bottom left arrow onto your image to process
+
+**This process provides better Luminance protection than
+  the standard SCNR process.  Special thanks to James Lamb
+  for providing us the concept                         */
+
+Amount= 0.95; //&lt;--Blend control      Hope you enjoy!!!
+
+
+
+
+
+
+
+
+
+
+
+
+   
+
+
+
+E1= $T[0]*.2126 + $T[1]*.7152 + $T[2]*0.0722; // Luminance
+E2=  min(mean($T[0],$T[2]),$T[1]); // Average Neutral Mask
+E3= $T[0]*.2126 + E2*.7152 + $T[2]*0.0722; //Luminance (Green Scaled)
+E4= iif($T==$T[0],$T[0],iif($T==$T[1],E2,$T[2])); // New RGB
+E5= E4*max(0.0000001,E1)/max(0.0000001,E3); //RGB with Lum
+((E5*Amount)+($T*~Amount))</parameter>
+      <parameter id="expression1"></parameter>
+      <parameter id="expression2"></parameter>
+      <parameter id="expression3"></parameter>
+      <parameter id="useSingleExpression" value="true"/>
+      <parameter id="symbols">Amount, E1,E2,E3,E4,E5,E6,E7,</parameter>
+      <parameter id="clearImageCacheAndExit" value="false"/>
+      <parameter id="cacheGeneratedImages" value="false"/>
+      <parameter id="generateOutput" value="true"/>
+      <parameter id="singleThreaded" value="false"/>
+      <parameter id="optimization" value="true"/>
+      <parameter id="use64BitWorkingImage" value="false"/>
+      <parameter id="rescale" value="false"/>
+      <parameter id="rescaleLower" value="0"/>
+      <parameter id="rescaleUpper" value="1"/>
+      <parameter id="truncate" value="true"/>
+      <parameter id="truncateLower" value="0"/>
+      <parameter id="truncateUpper" value="1"/>
+      <parameter id="createNewImage" value="false"/>
+      <parameter id="showNewImage" value="true"/>
+      <parameter id="newImageId"></parameter>
+      <parameter id="newImageWidth" value="0"/>
+      <parameter id="newImageHeight" value="0"/>
+      <parameter id="newImageAlpha" value="false"/>
+      <parameter id="newImageColorSpace" value="SameAsTarget"/>
+      <parameter id="newImageSampleFormat" value="SameAsTarget"/>
+      <table id="outputData" rows="0"/>
+   </instance>
+   <instance class="PixelMath" version="256" id="Bills_Stretch_Llinked__V4_instance">
+      <parameter id="expression">/*      Linked Stretch Test with Curve Adjustment         
+                    by Bill Blanshan                     */
+
+
+Stretch=  0.20 ; //&lt;-- Target background value
+Curve=    1.00 ; //&lt;-- 1= MTF style, &gt;1= Reduce Highlights
+
+
+
+//Drag the bottom left arrow over into the image you want stretched 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+m = (med($T[0])+med($T[1])+med($T[2]))/3;
+d = (mdev($T[0])+mdev($T[1])+mdev($T[2]))/3;
+E1= min(max(0,m+-2.8*1.4826*d),1);
+E2= max(0,($T-E1)/~E1);
+E3= m-E1;
+E4= min(1,(1/Curve));
+E5= ((Stretch-1)*E3) / ((2*Stretch-1) * E3^E4-Stretch); //MTF value
+E6= ( (E5-1)*E2) / ( (2*E5-1) * E2^E4-E5);
+
+E6</parameter>
+      <parameter id="expression1"></parameter>
+      <parameter id="expression2"></parameter>
+      <parameter id="expression3"></parameter>
+      <parameter id="useSingleExpression" value="true"/>
+      <parameter id="symbols">Stretch,Curve,m,d,
+E1,E2,E3,E4,E5,E6,E7,</parameter>
+      <parameter id="clearImageCacheAndExit" value="false"/>
+      <parameter id="cacheGeneratedImages" value="false"/>
+      <parameter id="generateOutput" value="true"/>
+      <parameter id="singleThreaded" value="false"/>
+      <parameter id="optimization" value="true"/>
+      <parameter id="use64BitWorkingImage" value="false"/>
+      <parameter id="rescale" value="false"/>
+      <parameter id="rescaleLower" value="0"/>
+      <parameter id="rescaleUpper" value="1"/>
+      <parameter id="truncate" value="true"/>
+      <parameter id="truncateLower" value="0"/>
+      <parameter id="truncateUpper" value="1"/>
+      <parameter id="createNewImage" value="false"/>
+      <parameter id="showNewImage" value="true"/>
+      <parameter id="newImageId"></parameter>
+      <parameter id="newImageWidth" value="0"/>
+      <parameter id="newImageHeight" value="0"/>
+      <parameter id="newImageAlpha" value="false"/>
+      <parameter id="newImageColorSpace" value="SameAsTarget"/>
+      <parameter id="newImageSampleFormat" value="SameAsTarget"/>
+      <table id="outputData" rows="0"/>
+   </instance>
+   <instance class="PixelMath" version="256" id="HOONormalizationV5_instance">
+      <parameter id="expression">/*       Normalize HOO data with Pixelmath - V5
+                 by Bill Blanshan                 */
+                    
+NormMode=       0 ; //&lt;-- 0= L-Normalization,1= C-Normalization
+BlendMode=      0 ; //&lt;-- 0= Lukomatico, 1= AAC 
+Luminance=      0 ; //&lt;-- 0=OFF, 1=Original, 2=Ha
+Mask=           1 ; //&lt;-- Nebulosity Mask, 0-OFF, 1=On
+HaBlend=      0.6 ; //&lt;-- Higher the value, more &quot;SHO&quot; like image
+OIIIBoost=    1.0 ; //&lt;-- Increase to boost OIII
+HLRecover=    1.0 ; //&lt;-- If highlights are clipped, increase &gt;1
+HLReduction=  1.0 ; //&lt;-- If highlights are too bright, increase &gt;1
+Brightness=   1.0 ; //&lt;-- Increase to stretch image
+
+/* Drag the bottom left arrow over to your HOO image
+
+ Hope you enjoy!!!
+
+1) NormMode: I developed 2 different normalization methods;
+   L-Normalization and C-Normalization.  &quot;L&quot; stands for Linear
+   Stretch normalization and &quot;C&quot; stands for Curve Stretch
+   normalization.
+
+   &quot;L&quot; mode is a linear stretch of the image to normalize
+   OIII to that of Ha.
+
+   Advanage: OIII can dominate Ha signals to show off more
+   &quot;Hubble Pallet&quot; like blue colors in OIII areas. If no
+   clipping occurs, the image can result in good natural
+   contrast without the need for luminance control.
+   
+   Disadvantage: Ha signal within stronger OIII areas can
+   be reduced.  Also, depending on the OIII signal strength,
+   this normalization process can blow out &quot;clip&quot; the
+   highlights. An example of this would be the Rosette
+   nebula which has a strong OIII core.  To help with this,
+   You can choose to use the &quot;Luminance&quot; feature (read below)
+   to help recover the highlights. You can also use the
+   &quot;HLRecovery&quot; feature which will rescale the image back
+   into normal unclipped range.
+
+   &quot;C&quot; mode is a curve stretch of the image to normalize
+   OIII to that of Ha.
+
+   Advanage: Because this is a curve stretch, this
+   significantly reduces highlight clipping while increasing
+   the intensity of the OIII signal. Ha and OIII signals
+   are more even in the highlight zone while the shadow
+   and midtones are stretched vs one signal over coming the
+   other which is what happens with linear normalization.
+   
+   Disadvantage:  If the OIII signal is weak, a heavy
+   normalization curve stretch could wash out some
+   contrast.  The contrast can be regained using the
+   &quot;Luminance&quot; feature but may not be as detailed as the
+   L-Normalization process; it all depends on the target.
+  
+
+2) BlendMode:  Here we have two options to help create
+   the synthetic green channel using the Ha and OIII
+   data. Mode:0 and Mode:1
+
+   Mode: 0 is the Luke Newbould &quot;Lukomatico&quot; approach,
+   where we blend in the Ha to that of the normalized OIII
+   to create the green channel. Here, Ha is red, OIII
+   is blue, and green is the blend. Depending on the
+   HaBlend value used, the results can produce images
+   that have &quot;SHO&quot; like appearance.
+
+   Mode: 1 is my ACC method of creating a synthetic
+   green, but unlike Mode: 0, here we blend the Ha data to
+   that of original OIII data to create the Green. We
+   then use Ha for Red and normalized OIII for blue.  
+   The advantage of this method is to help showcase the
+   &quot;HOO&quot; pallet more by showing off the Reds and Blues.
+   The Ha blend is controlled by the &quot;HaBlend&quot; feature
+
+3) Luminance:  The advantage of luminance control is to
+   help control the image from being clipped, especially
+   when L-Normalization is used, but is also good for showing
+   more detail i.e. if Ha &quot;2&quot; mode is used. When luminance
+   feature is set to Off &quot;0&quot;, the produced image has no
+   luminance correction. When set to &quot;1&quot;, the produced image
+   brightness is being controlled by using the luminance
+   from the original image.  When set to &quot;2&quot; or Ha,
+   the produced image is using the luminance from
+   the Ha data.  Using Ha as luminance can really help
+   produce a very detailed final image.
+
+4) Mask:  This feature helps us mask out background noise
+   that can result during the normalization process. It
+   is recommended to leave this mask ON &quot;1&quot; but you have
+   the option to turn is off &quot;0&quot;.
+
+5) HaBlend:  This feature allows you to control the blend
+   amount of the Ha signal to that of the OIII signal
+   to help create the synthetic green channel i.e. 0.60
+   is a 60% blend of Ha and 40% of OIII.  Example: When
+   using the L-normalization mode and a BlendMode of 0
+   &quot;Lukomatico&quot; method, the higher this HaBlend value is,
+   the more &quot;SHO&quot; like image is produced.
+
+6) OIIIBoost:  This feauture allows you to boost or
+   reduce more OIII signal into your image. a value greater
+   than 1 will boost and a value less than 1 will reduce.
+   It is unlikely you will need to use this but I gave you
+   the option just in case.
+
+7) HLRecover:   This feature is a linear rescaling method
+   to help recover highlights in case they have been clipped.
+   The default value is 1, so if you run this normalization
+   process and your image is clipped, you can increase this
+   value to unclip the image e.g. a value of 1.1 or 1.2 might
+   be ok. Always leave at value 1 unless you need to recover
+   clipped data.
+
+8) HLReduction:  This feature is a reversed curve stretch
+   on the highlights alone. example, the Rosette nebula has
+   a bright core.  You can use this method by increasing the
+   value to greater than 1 to help reduce the highlights while
+   keeping your shadows the same.  This method can also work
+   in reverse, meaning, you can reduce this value to increase
+   highlights ;-)
+
+9) Brightness:  This is the final step within this
+   pixelmath script.  This feature will perform a curve
+   stretch to increase overall brightness of the image with
+   a value greater than 1. A value less than 1 will reduce
+   brightness but should not be used to regain clipping, that
+   should be done using the HLRecover feature.
+
+
+Notes:
+   
+1) It is suggested the image used should be a non-linear
+   starless image. An image with stars will result in
+   an image with severly discolored stars. IF you want to
+   try this script on linear data, make sure that Luminance
+   is off &quot;0&quot;, but the star color will not be great 
+   
+2) Preferred stretching method for any narrowband data
+   is the &quot;unlinked stretch&quot;.  This method helps with
+   equalization of the narrowband data and helps 
+   normalization work better.  Stretching methods like
+   EZ Soft Stretch and GHS are &quot;linked&quot; stretches so the
+   results can vary using these methods. Unlinked is perfered.     
+
+   Also, dont over stretch your image!  This can happen
+   when using stretching scipts/maths if the image has
+   been denoised in the linear stage. So please control
+   your stretching :-)
+
+3) Make sure your starless image is background neutralized.
+   When performing  this on a non-linear image, and using
+   the BackgroundNeutralization process, it is best to set
+   the BackgroundNeutralization Upper limit value to a
+   value higher than your backround reading.  Then set the
+   working mode to &quot;Target Background&quot; and use a value
+   to your liking e.g. 0.150.  This helps give good results
+   for normalization. 
+
+4) Preferred method for adding the stars back is using
+   the &quot;unscreen/screen&quot; method, or my RGB to Narrowband
+   pixelmath so that star color is preserved.   
+
+
+
+
+
+
+
+
+
+
+*/
+
+
+
+
+
+
+
+
+
+
+
+E1= adev($T[0])/adev($T[1]);
+E2= iif(NormMode==0,((E1*OIIIBoost)*($T[1]-med($T[1]))+med($T[0])),
+    mtf(0.5/(E1*OIIIBoost),$T[1]-med($T[1]))+med($T[0]) );
+E3= iif(BlendMode==0,(($T[0]*HaBlend)+(E2*~HaBlend)),
+                     (($T[0]*HaBlend)+($T[1]*~HaBlend)));
+
+E5= iif($T==$T[0],$T[0],iif($T==$T[1],E3,E2));
+E6= rescale(CIEL($T),min(med($T[0]),med($T[1]),med($T[2])),0.20);
+
+E7= iif(Mask==0,E5,(E5*E6)+($T*~E6));
+E8= ($T[0]^2+$T[1]^2+$T[2]^2)/($T[0]+$T[1]+$T[2]);
+E9= (E7[0]^2+E7[1]^2+E7[2]^2)/(E7[0]+E7[1]+E7[2]);
+E10= rescale(iif(Luminance==0,E7,iif(Luminance==1,E7*(E8/E9),
+     E7*($T[0])/E9)),0,HLRecover);
+E11= ((mtf(~(1/HLReduction*.5),E10-min($T))+min($T))*
+     E10)+(E10*~E10);
+E12= mtf((1/Brightness*.5),E11-min($T))+min($T);
+E12</parameter>
+      <parameter id="expression1"></parameter>
+      <parameter id="expression2"></parameter>
+      <parameter id="expression3"></parameter>
+      <parameter id="useSingleExpression" value="true"/>
+      <parameter id="symbols">Symbols,
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+NormMode,BlendMode,OIIIBoost,Brightness,HaBlend,
+Luminance,HLReduction,HLRecover,Mask,
+C1,C2,C3,
+E1,E2,E3,E4,E5,E6,E7,E8,E9,E10,
+E11,E12,E13,E14,E15,E16,E17,
+R1,G1,B1,R2,G2,B2,R3,G3,B3,L,a,b,
+X,Y,Z,X1,Y1,Z1,X2,Y2,Z2,X3,Y3,Z3,</parameter>
+      <parameter id="clearImageCacheAndExit" value="false"/>
+      <parameter id="cacheGeneratedImages" value="false"/>
+      <parameter id="generateOutput" value="true"/>
+      <parameter id="singleThreaded" value="false"/>
+      <parameter id="optimization" value="true"/>
+      <parameter id="use64BitWorkingImage" value="false"/>
+      <parameter id="rescale" value="false"/>
+      <parameter id="rescaleLower" value="0"/>
+      <parameter id="rescaleUpper" value="1"/>
+      <parameter id="truncate" value="true"/>
+      <parameter id="truncateLower" value="0"/>
+      <parameter id="truncateUpper" value="1"/>
+      <parameter id="createNewImage" value="false"/>
+      <parameter id="showNewImage" value="true"/>
+      <parameter id="newImageId"></parameter>
+      <parameter id="newImageWidth" value="0"/>
+      <parameter id="newImageHeight" value="0"/>
+      <parameter id="newImageAlpha" value="false"/>
+      <parameter id="newImageColorSpace" value="SameAsTarget"/>
+      <parameter id="newImageSampleFormat" value="SameAsTarget"/>
+      <table id="outputData" rows="0"/>
+   </instance>
+   <instance class="PixelMath" version="256" id="SHONormalizationV5_instance">
+      <parameter id="expression">/*       Normalize SHO data with Pixelmath - V5
+                 by Bill Blanshan                 */
+                    
+NormMode=       0 ; //&lt;-- 0= L-Normalization,1= C-Normalization
+Luminance=      0 ; //&lt;-- 0=OFF, 1=Original, 2=Ha
+SCNR=           0 ; //&lt;-- 0=OFF, 1=On
+Mask=           1 ; //&lt;-- Nebulosity Mask, 0-OFF, 1=On
+SIIBoost=     1.0 ; //&lt;-- Increase to boost SII
+OIIIBoost=    1.0 ; //&lt;-- Increase to boost OIII
+HLRecover=    1.0 ; //&lt;-- If highlights are clipped, increase &gt;1
+HLReduction=  1.0 ; //&lt;-- If highlights are too bright, increase &gt;1
+Brightness=   1.0 ; //&lt;-- Increase to stretch image
+
+/* Drag the bottom left arrow over to your SHO image
+
+ Hope you enjoy!!!
+
+1) NormMode: I developed 2 different normalization methods;
+   L-Normalization and C-Normalization.  &quot;L&quot; stands for Linear
+   Stretch Normalization and &quot;C&quot; stands for Curve Stretch
+   Normalization.
+
+   &quot;L&quot; mode is a linear stretch of the image to normalize
+   OIII &amp; SII to that of Ha.
+
+   Advantage: In OIII &amp; SII areas, these signals when
+   normalized can dominate the Ha signals to show off
+   more Blue and Red colors. If no clipping occurs, the
+   image can result in good natural contrast without the
+   need for luminance control.
+   
+   Disadvantage: Ha signal within stronger OIII &amp; SII areas
+   can be reduced, thus so does the Ha color.  Also,
+   depending on the OIII &amp; SII signal strength, this
+   normalization process can blow out &quot;clip&quot; the highlights.
+   An example of this would be the Rosette nebula which
+   has a strong OIII core.  To help with this, You can choose
+   to use the &quot;Luminance&quot; feature (read below) to help recover
+   the highlights. You can also use the &quot;HLRecovery&quot; feature
+   which will rescale the image back into normal unclipped
+   range.
+
+   &quot;C&quot; mode is a curve stretch of the image to normalize
+   OIII to that of Ha.
+
+   Advantage: Because this is a curve stretch, this
+   significantly reduces highlight clipping while increasing
+   the intensity of the OIII &amp; SII signals. Ha and OIII/SII
+   signals are more even in the highlight zone while the shadow
+   and midtones are stretched vs one signal overcoming the
+   other which is what happens with linear normalization.
+      
+   Disadvantage:  If the OIII/SII signal is weak, a heavy
+   normalization curve stretch could wash out some contrast.
+   The contrast can be regained using the &quot;Luminance&quot; feature
+   but may not be as detailed as the L-Normalization process;
+   it all depends on the target so please try both methods
+   when processing and pick the best result.
+      
+2) Luminance:  The advantage of luminance control is to
+   help control the image from being clipped, especially
+   when L-Normalization is used, but is also good for showing
+   more detail i.e. if Ha &quot;2&quot; mode is used. When luminance
+   feature is set to Off &quot;0&quot;, the produced image has no
+   luminance correction. When set to &quot;1&quot;, the produced image
+   brightness is being controlled by using the luminance
+   from the original image.  When set to &quot;2&quot; or Ha,
+   the produced image is using the luminance from
+   the Ha data.  Using Ha as luminance can really help
+   produce a very detailed final image.
+
+3) SCNR:  When On, any green cast will be removed while
+   retaining its luminance 
+
+4) Mask:  This feature helps us mask out background noise
+   that can result during the normalization process. It
+   is recommended to leave this mask ON &quot;1&quot; but you have
+   the option to turn is off &quot;0&quot;.
+
+5) OIII &amp; SIIBoost:  These feature allows you to boost or
+   reduce more OIII/SII signal into your image. a value
+   greater than 1 will boost and a value less than 1 will
+   reduce. It is unlikely you will need to use this but
+   I gave you the option just in case.
+
+6) HLRecover:   This feature is a linear rescaling method
+   to help recover highlights incase they have been clipped.
+   The default value is 1, so if you run this normalization
+   process and your image is clipped, you can increase this
+   value to unclip the image e.g. a value of 1.1 or 1.2 might
+   be ok. Always leave at value 1 unless you need to recover
+   clipped data.
+
+8) HLReduction:  This feature is a reversed curve stretch
+   on the highlights alone. example, the Rosette nebula has
+   a bright core.  You can use this method by increasing the
+   value to greater than 1 to help reduce the highlights while
+   keeping your shadows the same.  This method can also work
+   in reverse, meaning, you can reduce this value to increase
+   highlights ;-)
+
+9) Brightness:  This is the final step within this
+   pixelmath script.  This feature will perform a curve
+   stretch to increase overall brightness of the image with
+   a value greater than 1. A value less than 1 will reduce
+   brightness but should not be used to regain clipping, that
+   should be done using the HLRecover feature.
+
+
+Notes:
+   
+1) It is suggested the image used should be a non-linear
+   starless image. An image with stars will result in
+   an image with severly discolored stars. IF you want to
+   try this script on linear data, make sure that Luminance
+   is off &quot;0&quot;, but the star color will not be great 
+   
+2) Preferred stretching method for any narrowband data
+   is the &quot;unlinked stretch&quot;.  This method helps with
+   equalization of the narrowband data and helps 
+   normalization work better.  Stretching methods like
+   EZ Soft Stretch and GHS are &quot;linked&quot; stretches so the
+   results can vary using these methods. Unlinked is
+   perferred.
+
+   Also, dont over stretch your image!  This can happen
+   when using automatic stretching scipts/maths if the
+   image has been denoised in the linear stage. So please
+   control your initial stretching, you can also stretch
+   further after this process :-)
+
+3) Make sure your starless image is background neutralized.
+   When performing this on a non-linear image, and using
+   the BackgroundNeutralization process, it is best to set
+   the BackgroundNeutralization Upper limit value to a
+   value higher than your backround reading.  Then set the
+   working mode to &quot;Target Background&quot; and use a value
+   to your liking e.g. 0.150.  This helps give good results
+   for normalization. 
+
+4) Preferred method for adding the stars back is using
+   the &quot;unscreen/screen&quot; method, or my RGB to Narrowband
+   pixelmath so that star color is preserved.   
+
+
+
+
+*/
+
+
+
+
+
+
+
+
+
+
+E1= adev($T[1])/adev($T[0]);
+E2= iif(NormMode==0,((E1*SIIBoost)*($T[0]-med($T[0]))+med($T[0])),
+    mtf(0.5/(E1*SIIBoost),$T[0]-med($T[0]))+med($T[0]) );
+
+E3= adev($T[1])/adev($T[2]);
+E4= iif(NormMode==0,((E3*OIIIBoost)*($T[2]-med($T[2]))+med($T[2])),
+    mtf(0.5/(E1*OIIIBoost),$T[2]-med($T[2]))+med($T[2]) );
+
+E5= iif($T==$T[0],E2,iif($T==$T[1],$T[1],E4));
+
+E6= rescale(CIEL($T),min(med($T[0]),med($T[1]),med($T[2])),0.20);
+
+E7= iif(Mask==0,E5,(E5*E6)+($T*~E6));
+E8= max(0.0000001,($T[0]^2+$T[1]^2+$T[2]^2))/
+    max(0.0000001,($T[0]+$T[1]+$T[2]));
+E9= max(0.0000001,(E7[0]^2+E7[1]^2+E7[2]^2))/
+    max(0.0000001,(E7[0]+E7[1]+E7[2]));
+E10= rescale(iif(Luminance==0,E7,iif(Luminance==1,E7*(E8/E9),
+     E7*(max(0.0000001,$T[1])/E9))),0,HLRecover);
+E11= ((mtf(~(1/HLReduction*.5),E10-min($T))+min($T))*
+     E10)+(E10*~E10);
+E12= mtf((1/Brightness*.5),E11-min($T))+min($T);
+
+E13= E12[0]*.2126 + E12[1]*.7152 + E12[2]*0.0722; 
+E14= min(mean(E12[0],E12[2]),E12[1]);
+E15= E12[0]*.2126 + E14*.7152 + E12[2]*0.0722;
+E16= iif($T==$T[0],E12[0],iif($T==$T[1],E14,E12[2])); 
+E17= iif(SCNR==0,E12,E16*max(0.0000001,E13)/max(0.0000001,E15));
+E17</parameter>
+      <parameter id="expression1"></parameter>
+      <parameter id="expression2"></parameter>
+      <parameter id="expression3"></parameter>
+      <parameter id="useSingleExpression" value="true"/>
+      <parameter id="symbols">Symbols,
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+NormMode,SCNR,OIIIBoost,SIIBoost,Brightness,
+Luminance,HLReduction,HLRecover,Mask,
+C1,C2,C3,
+E1,E2,E3,E4,E5,E6,E7,E8,E9,E10,
+E11,E12,E13,E14,E15,E16,E17,
+R1,G1,B1,R2,G2,B2,R3,G3,B3,L,a,b,
+X,Y,Z,X1,Y1,Z1,X2,Y2,Z2,X3,Y3,Z3,</parameter>
+      <parameter id="clearImageCacheAndExit" value="false"/>
+      <parameter id="cacheGeneratedImages" value="false"/>
+      <parameter id="generateOutput" value="true"/>
+      <parameter id="singleThreaded" value="false"/>
+      <parameter id="optimization" value="true"/>
+      <parameter id="use64BitWorkingImage" value="false"/>
+      <parameter id="rescale" value="false"/>
+      <parameter id="rescaleLower" value="0"/>
+      <parameter id="rescaleUpper" value="1"/>
+      <parameter id="truncate" value="true"/>
+      <parameter id="truncateLower" value="0"/>
+      <parameter id="truncateUpper" value="1"/>
+      <parameter id="createNewImage" value="false"/>
+      <parameter id="showNewImage" value="true"/>
+      <parameter id="newImageId"></parameter>
+      <parameter id="newImageWidth" value="0"/>
+      <parameter id="newImageHeight" value="0"/>
+      <parameter id="newImageAlpha" value="false"/>
+      <parameter id="newImageColorSpace" value="SameAsTarget"/>
+      <parameter id="newImageSampleFormat" value="SameAsTarget"/>
+      <table id="outputData" rows="0"/>
+   </instance>
+   <instance class="PixelMath" version="256" id="HSONormalizationV5_instance">
+      <parameter id="expression">/*       Normalize HSO data with Pixelmath - V5
+                 by Bill Blanshan                 */
+                    
+NormMode=       0 ; //&lt;-- 0= L-Normalization,1= C-Normalization
+Luminance=      0 ; //&lt;-- 0=OFF, 1=Original, 2=Ha
+SCNR=           0 ; //&lt;-- 0=OFF, 1=On
+Mask=           1 ; //&lt;-- Nebulosity Mask, 0-OFF, 1=On
+SIIBoost=     1.0 ; //&lt;-- Increase to boost SII
+OIIIBoost=    1.0 ; //&lt;-- Increase to boost OIII
+HLRecover=    1.0 ; //&lt;-- If highlights are clipped, increase &gt;1
+HLReduction=  1.0 ; //&lt;-- If highlights are too bright, increase &gt;1
+Brightness=   1.0 ; //&lt;-- Increase to stretch image
+
+/* Drag the bottom left arrow over to your HSO image
+
+ Hope you enjoy!!!
+
+1) NormMode: I developed 2 different normalization methods;
+   L-Normalization and C-Normalization.  &quot;L&quot; stands for Linear
+   Stretch Normalization and &quot;C&quot; stands for Curve Stretch
+   Normalization.
+
+   &quot;L&quot; mode is a linear stretch of the image to normalize
+   OIII &amp; SII to that of Ha.
+
+   Advantage: In OIII &amp; SII areas, these signals when
+   normalized can dominate the Ha signals to show off
+   more Blue and Red colors. If no clipping occurs, the
+   image can result in good natural contrast without the
+   need for luminance control.
+   
+   Disadvantage: Ha signal within stronger OIII &amp; SII areas
+   can be reduced, thus so does the Ha color.  Also,
+   depending on the OIII &amp; SII signal strength, this
+   normalization process can blow out &quot;clip&quot; the highlights.
+   An example of this would be the Rosette nebula which
+   has a strong OIII core.  To help with this, You can choose
+   to use the &quot;Luminance&quot; feature (read below) to help recover
+   the highlights. You can also use the &quot;HLRecovery&quot; feature
+   which will rescale the image back into normal unclipped
+   range.
+
+   &quot;C&quot; mode is a curve stretch of the image to normalize
+   OIII to that of Ha.
+
+   Advantage: Because this is a curve stretch, this
+   significantly reduces highlight clipping while increasing
+   the intensity of the OIII &amp; SII signals. Ha and OIII/SII
+   signals are more even in the highlight zone while the shadow
+   and midtones are stretched vs one signal overcoming the
+   other which is what happens with linear normalization.
+      
+   Disadvantage:  If the OIII/SII signal is weak, a heavy
+   normalization curve stretch could wash out some contrast.
+   The contrast can be regained using the &quot;Luminance&quot; feature
+   but may not be as detailed as the L-Normalization process;
+   it all depends on the target so please try both methods
+   when processing and pick the best result.
+      
+2) Luminance:  The advantage of luminance control is to
+   help control the image from being clipped, especially
+   when L-Normalization is used, but is also good for showing
+   more detail i.e. if Ha &quot;2&quot; mode is used. When luminance
+   feature is set to Off &quot;0&quot;, the produced image has no
+   luminance correction. When set to &quot;1&quot;, the produced image
+   brightness is being controlled by using the luminance
+   from the original image.  When set to &quot;2&quot; or Ha,
+   the produced image is using the luminance from
+   the Ha data.  Using Ha as luminance can really help
+   produce a very detailed final image.
+
+3) SCNR:  When On, any green cast will be removed while
+   retaining its luminance 
+
+4) Mask:  This feature helps us mask out background noise
+   that can result during the normalization process. It
+   is recommended to leave this mask ON &quot;1&quot; but you have
+   the option to turn is off &quot;0&quot;.
+
+5) OIII &amp; SIIBoost:  These feature allows you to boost or
+   reduce more OIII/SII signal into your image. a value
+   greater than 1 will boost and a value less than 1 will
+   reduce. It is unlikely you will need to use this but
+   I gave you the option just in case.
+
+6) HLRecover:   This feature is a linear rescaling method
+   to help recover highlights incase they have been clipped.
+   The default value is 1, so if you run this normalization
+   process and your image is clipped, you can increase this
+   value to unclip the image e.g. a value of 1.1 or 1.2 might
+   be ok. Always leave at value 1 unless you need to recover
+   clipped data.
+
+8) HLReduction:  This feature is a reversed curve stretch
+   on the highlights alone. example, the Rosette nebula has
+   a bright core.  You can use this method by increasing the
+   value to greater than 1 to help reduce the highlights while
+   keeping your shadows the same.  This method can also work
+   in reverse, meaning, you can reduce this value to increase
+   highlights ;-)
+
+9) Brightness:  This is the final step within this
+   pixelmath script.  This feature will perform a curve
+   stretch to increase overall brightness of the image with
+   a value greater than 1. A value less than 1 will reduce
+   brightness but should not be used to regain clipping, that
+   should be done using the HLRecover feature.
+
+
+Notes:
+   
+1) It is suggested the image used should be a non-linear
+   starless image. An image with stars will result in
+   an image with severly discolored stars. IF you want to
+   try this script on linear data, make sure that Luminance
+   is off &quot;0&quot;, but the star color will not be great 
+   
+2) Preferred stretching method for any narrowband data
+   is the &quot;unlinked stretch&quot;.  This method helps with
+   equalization of the narrowband data and helps 
+   normalization work better.  Stretching methods like
+   EZ Soft Stretch and GHS are &quot;linked&quot; stretches so the
+   results can vary using these methods. Unlinked is
+   perferred.
+
+   Also, dont over stretch your image!  This can happen
+   when using automatic stretching scipts/maths if the
+   image has been denoised in the linear stage. So please
+   control your initial stretching, you can also stretch
+   further after this process :-)
+
+3) Make sure your starless image is background neutralized.
+   When performing this on a non-linear image, and using
+   the BackgroundNeutralization process, it is best to set
+   the BackgroundNeutralization Upper limit value to a
+   value higher than your backround reading.  Then set the
+   working mode to &quot;Target Background&quot; and use a value
+   to your liking e.g. 0.150.  This helps give good results
+   for normalization. 
+
+4) Preferred method for adding the stars back is using
+   the &quot;unscreen/screen&quot; method, or my RGB to Narrowband
+   pixelmath so that star color is preserved.   
+
+
+
+
+*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+E1= adev($T[0])/adev($T[1]);
+E2= iif(NormMode==0,((E1*SIIBoost)*($T[1]-med($T[1]))+med($T[1])),
+    mtf(0.5/(E1*SIIBoost),$T[1]-med($T[1]))+med($T[1]) );
+
+E3= adev($T[0])/adev($T[2]);
+E4= iif(NormMode==0,((E3*OIIIBoost)*($T[2]-med($T[2]))+med($T[2])),
+    mtf(0.5/(E1*OIIIBoost),$T[2]-med($T[2]))+med($T[2]) );
+
+E5= iif($T==$T[0],$T[0],iif($T==$T[1],E2,E4));
+
+E6= rescale(CIEL($T),min(med($T[0]),med($T[1]),med($T[2])),0.20);
+
+E7= iif(Mask==0,E5,(E5*E6)+($T*~E6));
+E8= max(0.0000001,($T[0]^2+$T[1]^2+$T[2]^2))/
+    max(0.0000001,($T[0]+$T[1]+$T[2]));
+E9= max(0.0000001,(E7[0]^2+E7[1]^2+E7[2]^2))/
+    max(0.0000001,(E7[0]+E7[1]+E7[2]));
+E10= rescale(iif(Luminance==0,E7,iif(Luminance==1,E7*(E8/E9),
+     E7*(max(0.0000001,$T[0])/E9))),0,HLRecover);
+E11= ((mtf(~(1/HLReduction*.5),E10-min($T))+min($T))*
+     E10)+(E10*~E10);
+E12= mtf((1/Brightness*.5),E11-min($T))+min($T);
+
+E13= E12[0]*.2126 + E12[1]*.7152 + E12[2]*0.0722; 
+E14= min(mean(E12[0],E12[2]),E12[1]);
+E15= E12[0]*.2126 + E14*.7152 + E12[2]*0.0722;
+E16= iif($T==$T[0],E12[0],iif($T==$T[1],E14,E12[2])); 
+E17= iif(SCNR==0,E12,E16*max(0.0000001,E13)/max(0.0000001,E15));
+E17</parameter>
+      <parameter id="expression1"></parameter>
+      <parameter id="expression2"></parameter>
+      <parameter id="expression3"></parameter>
+      <parameter id="useSingleExpression" value="true"/>
+      <parameter id="symbols">Symbols,
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+NormMode,SCNR,OIIIBoost,SIIBoost,Brightness,
+Luminance,HLReduction,HLRecover,Mask,
+C1,C2,C3,
+E1,E2,E3,E4,E5,E6,E7,E8,E9,E10,
+E11,E12,E13,E14,E15,E16,E17,
+R1,G1,B1,R2,G2,B2,R3,G3,B3,L,a,b,
+X,Y,Z,X1,Y1,Z1,X2,Y2,Z2,X3,Y3,Z3,</parameter>
+      <parameter id="clearImageCacheAndExit" value="false"/>
+      <parameter id="cacheGeneratedImages" value="false"/>
+      <parameter id="generateOutput" value="true"/>
+      <parameter id="singleThreaded" value="false"/>
+      <parameter id="optimization" value="true"/>
+      <parameter id="use64BitWorkingImage" value="false"/>
+      <parameter id="rescale" value="false"/>
+      <parameter id="rescaleLower" value="0"/>
+      <parameter id="rescaleUpper" value="1"/>
+      <parameter id="truncate" value="true"/>
+      <parameter id="truncateLower" value="0"/>
+      <parameter id="truncateUpper" value="1"/>
+      <parameter id="createNewImage" value="false"/>
+      <parameter id="showNewImage" value="true"/>
+      <parameter id="newImageId"></parameter>
+      <parameter id="newImageWidth" value="0"/>
+      <parameter id="newImageHeight" value="0"/>
+      <parameter id="newImageAlpha" value="false"/>
+      <parameter id="newImageColorSpace" value="SameAsTarget"/>
+      <parameter id="newImageSampleFormat" value="SameAsTarget"/>
+      <table id="outputData" rows="0"/>
+   </instance>
+   <instance class="PixelMath" version="256" id="SHONormalizationV3_instance">
+      <parameter id="expression">/*       Normalize SHO data with Pixelmath - V3 
+                 by Bill Blanshan      
+                    
+See &quot;Symbols&quot; tab for blending modifications
+
+Drag the bottom left arrow over to your SHO image
+
+Notes:
+1) On symbols page, turn OFF Scurve=0, On=1
+
+2) Works best on a non-linear image; however, because this method
+is a linear style stretch, stars in the image will most likely be
+blown out.  It is best to remove the stars first.  The preferred
+method to adding the stars back is using my RGB to Narrowband
+pixel math so that star color is preserved.
+
+Hope you enjoy!!!
+
+
+*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+k= adev($T[1])/adev($T[0]);
+r1= ((k*SIIboost)*($T[0]-med($T[0]))+med($T[1]));
+r2= 3*r1^2-2*r1^3; // &lt;--Simple S-curve
+iif(SCurve==0,r1[0],r2[0])*BrightnessControl</parameter>
+      <parameter id="expression1">$T[1]*BrightnessControl</parameter>
+      <parameter id="expression2">k= adev($T[1])/adev($T[2]);
+b1= ((k*OIIIboost)*($T[2]-med($T[2]))+med($T[1]));
+b2= 3*b1^2-2*b1^3; // &lt;--Simple S-curve
+iif(SCurve==0,b1[0],b2[0])*BrightnessControl</parameter>
+      <parameter id="expression3"></parameter>
+      <parameter id="useSingleExpression" value="false"/>
+      <parameter id="symbols">SIIboost=           1.0 ;
+OIIIboost=          1.0 ;
+BrightnessControl=  1.0 ;
+SCurve        =      0  ;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+k,r1,r2,b1,b2,</parameter>
+      <parameter id="clearImageCacheAndExit" value="false"/>
+      <parameter id="cacheGeneratedImages" value="false"/>
+      <parameter id="generateOutput" value="true"/>
+      <parameter id="singleThreaded" value="false"/>
+      <parameter id="optimization" value="true"/>
+      <parameter id="use64BitWorkingImage" value="false"/>
+      <parameter id="rescale" value="false"/>
+      <parameter id="rescaleLower" value="0"/>
+      <parameter id="rescaleUpper" value="1"/>
+      <parameter id="truncate" value="true"/>
+      <parameter id="truncateLower" value="0"/>
+      <parameter id="truncateUpper" value="1"/>
+      <parameter id="createNewImage" value="false"/>
+      <parameter id="showNewImage" value="true"/>
+      <parameter id="newImageId"></parameter>
+      <parameter id="newImageWidth" value="0"/>
+      <parameter id="newImageHeight" value="0"/>
+      <parameter id="newImageAlpha" value="false"/>
+      <parameter id="newImageColorSpace" value="SameAsTarget"/>
+      <parameter id="newImageSampleFormat" value="SameAsTarget"/>
+      <table id="outputData" rows="0"/>
+   </instance>
+   <instance class="PixelMath" version="256" id="HOONormalizationV4_instance">
+      <parameter id="expression">/*       Normalize HOO data with Pixelmath - V4  
+      by Bill Blanshan -- Concept by Luke Newbould     
+                    
+See &quot;Symbols&quot; tab for blending modifications
+
+Drag the bottom left arrow over to your HOO image
+
+Notes:
+1) On symbols page, turn OFF OIII Scurve=0, On=1
+
+2) Works best on a non-linear image; however, because this method
+is a linear style stretch, stars in the image will most likely be
+blown out.  It is best to remove the stars first.  The preferred
+method to adding the stars back is using my RGB to Narrowband
+pixel math so that star color is preserved.
+
+Hope you enjoy!!!
+
+
+
+*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+$T[0]*BrightnessControl</parameter>
+      <parameter id="expression1">k= adev($T[0])/adev($T[1]);
+g1= ((k*OIIIBoost)*($T[1]-med($T[1]))+med($T[0]));
+g2= 3*g1^2-2*g1^3; // &lt;--Simple S-curve
+g3= iif(OIII_SCurve==0,g1,g2)*BrightnessControl;
+g4= $T[0]*BrightnessControl;
+g5= ((g3*~HaBlend)+(g4*HaBlend));
+g5</parameter>
+      <parameter id="expression2">k= adev($T[0])/adev($T[1]);
+b1= ((k*OIIIBoost)*($T[1]-med($T[1]))+med($T[0]));
+b2= 3*b1^2-2*b1^3; // &lt;--Simple S-curve
+b3= iif(OIII_SCurve==0,b1,b2)*BrightnessControl;
+b3</parameter>
+      <parameter id="expression3"></parameter>
+      <parameter id="useSingleExpression" value="false"/>
+      <parameter id="symbols">OIIIBoost=          1.0 ;
+HaBlend=            0.6 ;
+BrightnessControl=  1.0 ;
+OIII_SCurve=          0 ;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+k,r1,g1,g2,g3,g4,g5,b1,b2,b3,</parameter>
+      <parameter id="clearImageCacheAndExit" value="false"/>
+      <parameter id="cacheGeneratedImages" value="false"/>
+      <parameter id="generateOutput" value="true"/>
+      <parameter id="singleThreaded" value="false"/>
+      <parameter id="optimization" value="true"/>
+      <parameter id="use64BitWorkingImage" value="false"/>
+      <parameter id="rescale" value="false"/>
+      <parameter id="rescaleLower" value="0"/>
+      <parameter id="rescaleUpper" value="1"/>
+      <parameter id="truncate" value="true"/>
+      <parameter id="truncateLower" value="0"/>
+      <parameter id="truncateUpper" value="1"/>
+      <parameter id="createNewImage" value="false"/>
+      <parameter id="showNewImage" value="true"/>
+      <parameter id="newImageId"></parameter>
+      <parameter id="newImageWidth" value="0"/>
+      <parameter id="newImageHeight" value="0"/>
+      <parameter id="newImageAlpha" value="false"/>
+      <parameter id="newImageColorSpace" value="SameAsTarget"/>
+      <parameter id="newImageSampleFormat" value="SameAsTarget"/>
+      <table id="outputData" rows="0"/>
+   </instance>
+   <instance class="PixelMath" version="256" id="myStretch_instance">
+      <time start="2024-09-09T09:12:05.548Z" span="1.5234202"/>
+      <parameter id="expression">stretch=9; 
+contrast=1.5;
+
+
+sin(max(0,ln(($T+(1/(exp(stretch)-1)))*(1-exp(-stretch)))/stretch+1)*pi()/2)^contrast</parameter>
+      <parameter id="expression1"></parameter>
+      <parameter id="expression2"></parameter>
+      <parameter id="expression3"></parameter>
+      <parameter id="useSingleExpression" value="true"/>
+      <parameter id="symbols">stretch,contrast</parameter>
+      <parameter id="clearImageCacheAndExit" value="false"/>
+      <parameter id="cacheGeneratedImages" value="false"/>
+      <parameter id="generateOutput" value="true"/>
+      <parameter id="singleThreaded" value="false"/>
+      <parameter id="optimization" value="true"/>
+      <parameter id="use64BitWorkingImage" value="false"/>
+      <parameter id="rescale" value="false"/>
+      <parameter id="rescaleLower" value="0"/>
+      <parameter id="rescaleUpper" value="1"/>
+      <parameter id="truncate" value="true"/>
+      <parameter id="truncateLower" value="0"/>
+      <parameter id="truncateUpper" value="1"/>
+      <parameter id="createNewImage" value="false"/>
+      <parameter id="showNewImage" value="true"/>
+      <parameter id="newImageId"></parameter>
+      <parameter id="newImageWidth" value="0"/>
+      <parameter id="newImageHeight" value="0"/>
+      <parameter id="newImageAlpha" value="false"/>
+      <parameter id="newImageColorSpace" value="SameAsTarget"/>
+      <parameter id="newImageSampleFormat" value="SameAsTarget"/>
+      <table id="outputData" rows="0"/>
+   </instance>
+   <instance class="ImageIntegration" version="256" id="MyKometa_instance">
+      <table id="images" rows="0"/>
+      <parameter id="inputHints">fits-keywords normalize raw cfa signed-is-physical</parameter>
+      <parameter id="overrideImageType" value="false"/>
+      <parameter id="imageType" value="0"/>
+      <parameter id="combination" value="Average"/>
+      <parameter id="weightMode" value="PSFSignalWeight"/>
+      <parameter id="weightKeyword"></parameter>
+      <parameter id="csvWeightsFilePath"></parameter>
+      <parameter id="weightScale" value="WeightScale_BWMV"/>
+      <parameter id="minWeight" value="0.005000"/>
+      <parameter id="csvWeights"></parameter>
+      <parameter id="adaptiveGridSize" value="16"/>
+      <parameter id="adaptiveNoScale" value="false"/>
+      <parameter id="ignoreNoiseKeywords" value="false"/>
+      <parameter id="normalization" value="AdditiveWithScaling"/>
+      <parameter id="rejection" value="Rejection_ESD"/>
+      <parameter id="rejectionNormalization" value="Scale"/>
+      <parameter id="minMaxLow" value="1"/>
+      <parameter id="minMaxHigh" value="1"/>
+      <parameter id="pcClipLow" value="0.200"/>
+      <parameter id="pcClipHigh" value="0.100"/>
+      <parameter id="sigmaLow" value="4.000"/>
+      <parameter id="sigmaHigh" value="3.000"/>
+      <parameter id="winsorizationCutoff" value="5.000"/>
+      <parameter id="linearFitLow" value="5.000"/>
+      <parameter id="linearFitHigh" value="4.000"/>
+      <parameter id="esdOutliersFraction" value="0.45"/>
+      <parameter id="esdAlpha" value="1.00"/>
+      <parameter id="esdLowRelaxation" value="1.00"/>
+      <parameter id="rcrLimit" value="0.10"/>
+      <parameter id="ccdGain" value="1.00"/>
+      <parameter id="ccdReadNoise" value="10.00"/>
+      <parameter id="ccdScaleNoise" value="0.00"/>
+      <parameter id="clipLow" value="true"/>
+      <parameter id="clipHigh" value="true"/>
+      <parameter id="rangeClipLow" value="true"/>
+      <parameter id="rangeLow" value="0.000000"/>
+      <parameter id="rangeClipHigh" value="false"/>
+      <parameter id="rangeHigh" value="0.980000"/>
+      <parameter id="mapRangeRejection" value="true"/>
+      <parameter id="reportRangeRejection" value="false"/>
+      <parameter id="largeScaleClipLow" value="false"/>
+      <parameter id="largeScaleClipLowProtectedLayers" value="2"/>
+      <parameter id="largeScaleClipLowGrowth" value="2"/>
+      <parameter id="largeScaleClipHigh" value="true"/>
+      <parameter id="largeScaleClipHighProtectedLayers" value="1"/>
+      <parameter id="largeScaleClipHighGrowth" value="7"/>
+      <parameter id="generate64BitResult" value="false"/>
+      <parameter id="generateRejectionMaps" value="true"/>
+      <parameter id="generateSlopeMaps" value="false"/>
+      <parameter id="generateIntegratedImage" value="true"/>
+      <parameter id="generateDrizzleData" value="false"/>
+      <parameter id="closePreviousImages" value="false"/>
+      <parameter id="bufferSizeMB" value="16"/>
+      <parameter id="stackSizeMB" value="1024"/>
+      <parameter id="autoMemorySize" value="true"/>
+      <parameter id="autoMemoryLimit" value="0.75"/>
+      <parameter id="useROI" value="false"/>
+      <parameter id="roiX0" value="0"/>
+      <parameter id="roiY0" value="0"/>
+      <parameter id="roiX1" value="0"/>
+      <parameter id="roiY1" value="0"/>
+      <parameter id="useCache" value="true"/>
+      <parameter id="evaluateSNR" value="true"/>
+      <parameter id="noiseEvaluationAlgorithm" value="NoiseEvaluation_MRS"/>
+      <parameter id="mrsMinDataFraction" value="0.010"/>
+      <parameter id="psfStructureLayers" value="5"/>
+      <parameter id="psfType" value="PSFType_Moffat4"/>
+      <parameter id="generateFITSKeywords" value="true"/>
+      <parameter id="subtractPedestals" value="false"/>
+      <parameter id="truncateOnOutOfRange" value="false"/>
+      <parameter id="noGUIMessages" value="true"/>
+      <parameter id="showImages" value="true"/>
+      <parameter id="useFileThreads" value="true"/>
+      <parameter id="fileThreadOverload" value="1.00"/>
+      <parameter id="useBufferThreads" value="true"/>
+      <parameter id="maxBufferThreads" value="0"/>
+      <parameter id="integrationImageId"></parameter>
+      <parameter id="lowRejectionMapImageId"></parameter>
+      <parameter id="highRejectionMapImageId"></parameter>
+      <parameter id="slopeMapImageId"></parameter>
+      <parameter id="numberOfImages" value="0"/>
+      <parameter id="numberOfChannels" value="0"/>
+      <parameter id="numberOfPixels" value="0"/>
+      <parameter id="totalPixels" value="0"/>
+      <parameter id="outputRangeLow" value="0"/>
+      <parameter id="outputRangeHigh" value="0"/>
+      <parameter id="totalRejectedLowRK" value="0"/>
+      <parameter id="totalRejectedLowG" value="0"/>
+      <parameter id="totalRejectedLowB" value="0"/>
+      <parameter id="totalRejectedHighRK" value="0"/>
+      <parameter id="totalRejectedHighG" value="0"/>
+      <parameter id="totalRejectedHighB" value="0"/>
+      <parameter id="finalNoiseEstimateRK" value="0.000e+00"/>
+      <parameter id="finalNoiseEstimateG" value="0.000e+00"/>
+      <parameter id="finalNoiseEstimateB" value="0.000e+00"/>
+      <parameter id="finalNoiseScaleEstimateLowRK" value="0.000000e+00"/>
+      <parameter id="finalNoiseScaleEstimateLowG" value="0.000000e+00"/>
+      <parameter id="finalNoiseScaleEstimateLowB" value="0.000000e+00"/>
+      <parameter id="finalNoiseScaleEstimateHighRK" value="0.000000e+00"/>
+      <parameter id="finalNoiseScaleEstimateHighG" value="0.000000e+00"/>
+      <parameter id="finalNoiseScaleEstimateHighB" value="0.000000e+00"/>
+      <parameter id="finalNoiseAlgorithmRK"></parameter>
+      <parameter id="finalNoiseAlgorithmG"></parameter>
+      <parameter id="finalNoiseAlgorithmB"></parameter>
+      <parameter id="finalScaleEstimateRK" value="0.0000e+00"/>
+      <parameter id="finalScaleEstimateG" value="0.0000e+00"/>
+      <parameter id="finalScaleEstimateB" value="0.0000e+00"/>
+      <parameter id="finalLocationEstimateRK" value="0.0000e+00"/>
+      <parameter id="finalLocationEstimateG" value="0.0000e+00"/>
+      <parameter id="finalLocationEstimateB" value="0.0000e+00"/>
+      <parameter id="finalPSFTotalFluxEstimateRK" value="0.0000e+00"/>
+      <parameter id="finalPSFTotalFluxEstimateG" value="0.0000e+00"/>
+      <parameter id="finalPSFTotalFluxEstimateB" value="0.0000e+00"/>
+      <parameter id="finalPSFTotalPowerFluxEstimateRK" value="0.0000e+00"/>
+      <parameter id="finalPSFTotalPowerFluxEstimateG" value="0.0000e+00"/>
+      <parameter id="finalPSFTotalPowerFluxEstimateB" value="0.0000e+00"/>
+      <parameter id="finalPSFTotalMeanFluxEstimateRK" value="0.0000e+00"/>
+      <parameter id="finalPSFTotalMeanFluxEstimateG" value="0.0000e+00"/>
+      <parameter id="finalPSFTotalMeanFluxEstimateB" value="0.0000e+00"/>
+      <parameter id="finalPSFTotalMeanPowerFluxEstimateRK" value="0.0000e+00"/>
+      <parameter id="finalPSFTotalMeanPowerFluxEstimateG" value="0.0000e+00"/>
+      <parameter id="finalPSFTotalMeanPowerFluxEstimateB" value="0.0000e+00"/>
+      <parameter id="finalPSFMStarEstimateRK" value="0.0000e+00"/>
+      <parameter id="finalPSFMStarEstimateG" value="0.0000e+00"/>
+      <parameter id="finalPSFMStarEstimateB" value="0.0000e+00"/>
+      <parameter id="finalPSFNStarEstimateRK" value="0.0000e+00"/>
+      <parameter id="finalPSFNStarEstimateG" value="0.0000e+00"/>
+      <parameter id="finalPSFNStarEstimateB" value="0.0000e+00"/>
+      <parameter id="finalPSFCountRK" value="0"/>
+      <parameter id="finalPSFCountG" value="0"/>
+      <parameter id="finalPSFCountB" value="0"/>
+      <parameter id="referenceNoiseReductionRK" value="0.0000"/>
+      <parameter id="referenceNoiseReductionG" value="0.0000"/>
+      <parameter id="referenceNoiseReductionB" value="0.0000"/>
+      <parameter id="medianNoiseReductionRK" value="0.0000"/>
+      <parameter id="medianNoiseReductionG" value="0.0000"/>
+      <parameter id="medianNoiseReductionB" value="0.0000"/>
+      <parameter id="referenceSNRIncrementRK" value="0.0000"/>
+      <parameter id="referenceSNRIncrementG" value="0.0000"/>
+      <parameter id="referenceSNRIncrementB" value="0.0000"/>
+      <parameter id="averageSNRIncrementRK" value="0.0000"/>
+      <parameter id="averageSNRIncrementG" value="0.0000"/>
+      <parameter id="averageSNRIncrementB" value="0.0000"/>
+      <table id="imageData" rows="0"/>
+   </instance>
+   <instance class="PixelMath" version="256" id="MaskBlur_instance">
+      <time start="2024-07-29T09:49:34.819Z" span="0.2373048"/>
+      <parameter id="expression">gconv($T,  //Image name
+
+7,         //sigma -  Increase to add more blur
+1,         //aspectRatio - Default: 1
+0 )        //rotationAngle - Default: 0</parameter>
+      <parameter id="expression1"></parameter>
+      <parameter id="expression2"></parameter>
+      <parameter id="expression3"></parameter>
+      <parameter id="useSingleExpression" value="true"/>
+      <parameter id="symbols"></parameter>
+      <parameter id="clearImageCacheAndExit" value="false"/>
+      <parameter id="cacheGeneratedImages" value="false"/>
+      <parameter id="generateOutput" value="true"/>
+      <parameter id="singleThreaded" value="false"/>
+      <parameter id="optimization" value="true"/>
+      <parameter id="use64BitWorkingImage" value="false"/>
+      <parameter id="rescale" value="false"/>
+      <parameter id="rescaleLower" value="0"/>
+      <parameter id="rescaleUpper" value="1"/>
+      <parameter id="truncate" value="true"/>
+      <parameter id="truncateLower" value="0"/>
+      <parameter id="truncateUpper" value="1"/>
+      <parameter id="createNewImage" value="false"/>
+      <parameter id="showNewImage" value="true"/>
+      <parameter id="newImageId"></parameter>
+      <parameter id="newImageWidth" value="0"/>
+      <parameter id="newImageHeight" value="0"/>
+      <parameter id="newImageAlpha" value="false"/>
+      <parameter id="newImageColorSpace" value="SameAsTarget"/>
+      <parameter id="newImageSampleFormat" value="SameAsTarget"/>
+      <table id="outputData" rows="0"/>
+   </instance>
+   <instance class="PixelMath" version="256" id="GreenMask_instance">
+      <time start="2022-09-20T00:30:39.354Z" span="0.6286486"/>
+      <parameter id="expression">//  Simple Green Color Mask
+
+S= 1.0 ;//  Mask Strength (Range= 0 to 1)
+
+
+
+
+ 
+
+
+
+
+
+
+//Equations:
+iif(H($T)&lt;(1/6),0,iif(H($T)&lt;=(1/3),
+~mtf((H($T)-(1/6))/(1/6),~S)*
+CIEc($T),iif(H($T)&lt;=(3/6),~mtf(((3/6)-H($T))/
+(1/6),~S)*CIEc($T),0)))</parameter>
+      <parameter id="expression1"></parameter>
+      <parameter id="expression2"></parameter>
+      <parameter id="expression3"></parameter>
+      <parameter id="useSingleExpression" value="true"/>
+      <parameter id="symbols">S,</parameter>
+      <parameter id="clearImageCacheAndExit" value="false"/>
+      <parameter id="cacheGeneratedImages" value="false"/>
+      <parameter id="generateOutput" value="true"/>
+      <parameter id="singleThreaded" value="false"/>
+      <parameter id="optimization" value="true"/>
+      <parameter id="use64BitWorkingImage" value="false"/>
+      <parameter id="rescale" value="true"/>
+      <parameter id="rescaleLower" value="0"/>
+      <parameter id="rescaleUpper" value="1"/>
+      <parameter id="truncate" value="true"/>
+      <parameter id="truncateLower" value="0"/>
+      <parameter id="truncateUpper" value="1"/>
+      <parameter id="createNewImage" value="true"/>
+      <parameter id="showNewImage" value="true"/>
+      <parameter id="newImageId">GreenMask</parameter>
+      <parameter id="newImageWidth" value="0"/>
+      <parameter id="newImageHeight" value="0"/>
+      <parameter id="newImageAlpha" value="false"/>
+      <parameter id="newImageColorSpace" value="Gray"/>
+      <parameter id="newImageSampleFormat" value="i8"/>
+      <table id="outputData" rows="0"/>
+   </instance>
+   <instance class="PixelMath" version="256" id="YellowMask_instance">
+      <time start="2023-07-06T18:23:08.410Z" span="3.1940709"/>
+      <parameter id="expression">//  Simple Yellow Color Mask
+
+S= 1.0 ;//  Mask Strength (Range= 0 to 1)
+
+
+
+
+
+
+
+
+
+
+
+//Equations:
+iif(H($T)&lt;0,0,iif(H($T)&lt;=(1/6),
+~mtf((H($T)-0)/(1/6),~S)*
+CIEc($T),iif(H($T)&lt;=(1/3),~mtf(((1/3)-
+H($T))/(1/6),~S)*CIEc($T),0)));</parameter>
+      <parameter id="expression1"></parameter>
+      <parameter id="expression2"></parameter>
+      <parameter id="expression3"></parameter>
+      <parameter id="useSingleExpression" value="true"/>
+      <parameter id="symbols">S</parameter>
+      <parameter id="clearImageCacheAndExit" value="false"/>
+      <parameter id="cacheGeneratedImages" value="false"/>
+      <parameter id="generateOutput" value="true"/>
+      <parameter id="singleThreaded" value="false"/>
+      <parameter id="optimization" value="true"/>
+      <parameter id="use64BitWorkingImage" value="false"/>
+      <parameter id="rescale" value="true"/>
+      <parameter id="rescaleLower" value="0"/>
+      <parameter id="rescaleUpper" value="1"/>
+      <parameter id="truncate" value="true"/>
+      <parameter id="truncateLower" value="0"/>
+      <parameter id="truncateUpper" value="1"/>
+      <parameter id="createNewImage" value="true"/>
+      <parameter id="showNewImage" value="true"/>
+      <parameter id="newImageId">YellowMask</parameter>
+      <parameter id="newImageWidth" value="0"/>
+      <parameter id="newImageHeight" value="0"/>
+      <parameter id="newImageAlpha" value="false"/>
+      <parameter id="newImageColorSpace" value="Gray"/>
+      <parameter id="newImageSampleFormat" value="i8"/>
+      <table id="outputData" rows="0"/>
+   </instance>
+   <instance class="PixelMath" version="256" id="CyanMask_instance">
+      <time start="2024-07-29T09:46:55.744Z" span="2.3185347"/>
+      <parameter id="expression">//  Simple Cyan Color Mask
+
+S= 1.0 ;//  Mask Strength (Range= 0 to 1)
+
+
+
+
+
+
+
+
+
+
+
+//Equations:
+iif(H($T)&lt;(1/3),0,iif(H($T)&lt;=(3/6),
+~mtf((H($T)-(1/3))/(1/6),~S)*
+CIEc($T),iif(H($T)&lt;=(2/3),~mtf(((2/3)-
+H($T))/(1/6),~S)*CIEc($T),0)))</parameter>
+      <parameter id="expression1"></parameter>
+      <parameter id="expression2"></parameter>
+      <parameter id="expression3"></parameter>
+      <parameter id="useSingleExpression" value="true"/>
+      <parameter id="symbols">S,</parameter>
+      <parameter id="clearImageCacheAndExit" value="false"/>
+      <parameter id="cacheGeneratedImages" value="false"/>
+      <parameter id="generateOutput" value="true"/>
+      <parameter id="singleThreaded" value="false"/>
+      <parameter id="optimization" value="true"/>
+      <parameter id="use64BitWorkingImage" value="false"/>
+      <parameter id="rescale" value="true"/>
+      <parameter id="rescaleLower" value="0"/>
+      <parameter id="rescaleUpper" value="1"/>
+      <parameter id="truncate" value="true"/>
+      <parameter id="truncateLower" value="0"/>
+      <parameter id="truncateUpper" value="1"/>
+      <parameter id="createNewImage" value="true"/>
+      <parameter id="showNewImage" value="true"/>
+      <parameter id="newImageId">CyanMask</parameter>
+      <parameter id="newImageWidth" value="0"/>
+      <parameter id="newImageHeight" value="0"/>
+      <parameter id="newImageAlpha" value="false"/>
+      <parameter id="newImageColorSpace" value="Gray"/>
+      <parameter id="newImageSampleFormat" value="i8"/>
+      <table id="outputData" rows="0"/>
+   </instance>
+   <instance class="PixelMath" version="256" id="BlueMask_instance">
+      <time start="2024-07-29T09:47:08.245Z" span="2.1864871"/>
+      <parameter id="expression">//  Simple Blue Color Mask
+
+S= 1.0 ;//  Mask Strength (Range= 0 to 1)
+
+
+
+
+
+
+
+
+
+
+
+//Equations:
+iif(H($T)&lt;(3/6),0,iif(H($T)&lt;=(4/6),~mtf((H($T)-(3/6))/(1/6),
+0)*CIEc($T),iif(H($T)&lt;=(5/6),~mtf(((5/6)-H($T))/(1/6),0)*
+CIEc($T),0)))</parameter>
+      <parameter id="expression1"></parameter>
+      <parameter id="expression2"></parameter>
+      <parameter id="expression3"></parameter>
+      <parameter id="useSingleExpression" value="true"/>
+      <parameter id="symbols">S,</parameter>
+      <parameter id="clearImageCacheAndExit" value="false"/>
+      <parameter id="cacheGeneratedImages" value="false"/>
+      <parameter id="generateOutput" value="true"/>
+      <parameter id="singleThreaded" value="false"/>
+      <parameter id="optimization" value="true"/>
+      <parameter id="use64BitWorkingImage" value="false"/>
+      <parameter id="rescale" value="true"/>
+      <parameter id="rescaleLower" value="0"/>
+      <parameter id="rescaleUpper" value="1"/>
+      <parameter id="truncate" value="true"/>
+      <parameter id="truncateLower" value="0"/>
+      <parameter id="truncateUpper" value="1"/>
+      <parameter id="createNewImage" value="true"/>
+      <parameter id="showNewImage" value="true"/>
+      <parameter id="newImageId">BlueMask</parameter>
+      <parameter id="newImageWidth" value="0"/>
+      <parameter id="newImageHeight" value="0"/>
+      <parameter id="newImageAlpha" value="false"/>
+      <parameter id="newImageColorSpace" value="Gray"/>
+      <parameter id="newImageSampleFormat" value="i8"/>
+      <table id="outputData" rows="0"/>
+   </instance>
+   <instance class="PixelMath" version="256" id="MagentaMask_instance">
+      <time start="2024-07-29T10:02:57.609Z" span="1.5867119"/>
+      <parameter id="expression">//  Simple Magenta Color Mask
+
+S= 1.0 ;//  Mask Strength (Range= 0 to 1)
+
+
+
+
+
+
+
+
+
+
+
+//Equations:
+iif(H($T)&lt;=0,~mtf((0-H($T))/(1/6),~S)*CIEc($T),
+iif(H($T)&lt;(2/3),0,iif(H($T)&lt;=(5/6),
+~mtf((H($T)-(2/3))/(1/6),~S)*CIEc($T),
+~mtf((1+0-H($T))/(1/6),~S)*CIEc($T))))</parameter>
+      <parameter id="expression1"></parameter>
+      <parameter id="expression2"></parameter>
+      <parameter id="expression3"></parameter>
+      <parameter id="useSingleExpression" value="true"/>
+      <parameter id="symbols">S,</parameter>
+      <parameter id="clearImageCacheAndExit" value="false"/>
+      <parameter id="cacheGeneratedImages" value="false"/>
+      <parameter id="generateOutput" value="true"/>
+      <parameter id="singleThreaded" value="false"/>
+      <parameter id="optimization" value="true"/>
+      <parameter id="use64BitWorkingImage" value="false"/>
+      <parameter id="rescale" value="true"/>
+      <parameter id="rescaleLower" value="0"/>
+      <parameter id="rescaleUpper" value="1"/>
+      <parameter id="truncate" value="true"/>
+      <parameter id="truncateLower" value="0"/>
+      <parameter id="truncateUpper" value="1"/>
+      <parameter id="createNewImage" value="true"/>
+      <parameter id="showNewImage" value="true"/>
+      <parameter id="newImageId">MagentaMask</parameter>
+      <parameter id="newImageWidth" value="0"/>
+      <parameter id="newImageHeight" value="0"/>
+      <parameter id="newImageAlpha" value="false"/>
+      <parameter id="newImageColorSpace" value="Gray"/>
+      <parameter id="newImageSampleFormat" value="i8"/>
+      <table id="outputData" rows="0"/>
+   </instance>
+   <instance class="PixelMath" version="256" id="RedMask_instance">
+      <time start="2022-09-20T00:30:34.869Z" span="0.6630898"/>
+      <parameter id="expression">//  Simple Red Color Mask
+
+S= 1.0 ;//  Mask Strength (Range= 0 to 1)
+
+
+
+
+
+
+
+
+
+
+
+//Equations:
+iif(H($T)&lt;=0,~mtf((H($T)+1-(5/6))/(1/6),~S)*
+CIEc($T),iif(H($T)&lt;=(1/6),~mtf(((1/6)-H($T))/(1/6),~S)*
+CIEc($T),iif(H($T)&lt;(5/6),0,~mtf((H($T)-(5/6))/(1/6),~S)*
+CIEc($T))))</parameter>
+      <parameter id="expression1"></parameter>
+      <parameter id="expression2"></parameter>
+      <parameter id="expression3"></parameter>
+      <parameter id="useSingleExpression" value="true"/>
+      <parameter id="symbols">S,</parameter>
+      <parameter id="clearImageCacheAndExit" value="false"/>
+      <parameter id="cacheGeneratedImages" value="false"/>
+      <parameter id="generateOutput" value="true"/>
+      <parameter id="singleThreaded" value="false"/>
+      <parameter id="optimization" value="true"/>
+      <parameter id="use64BitWorkingImage" value="false"/>
+      <parameter id="rescale" value="true"/>
+      <parameter id="rescaleLower" value="0"/>
+      <parameter id="rescaleUpper" value="1"/>
+      <parameter id="truncate" value="true"/>
+      <parameter id="truncateLower" value="0"/>
+      <parameter id="truncateUpper" value="1"/>
+      <parameter id="createNewImage" value="true"/>
+      <parameter id="showNewImage" value="true"/>
+      <parameter id="newImageId">RedMask</parameter>
+      <parameter id="newImageWidth" value="0"/>
+      <parameter id="newImageHeight" value="0"/>
+      <parameter id="newImageAlpha" value="false"/>
+      <parameter id="newImageColorSpace" value="Gray"/>
+      <parameter id="newImageSampleFormat" value="i8"/>
+      <table id="outputData" rows="0"/>
+   </instance>
+   <instance class="PixelMath" version="256" id="CloneForStarless_instance">
+      <time start="2022-07-18T20:18:56.841Z" span="0.604877"/>
+      <parameter id="expression">$T</parameter>
+      <parameter id="expression1"></parameter>
+      <parameter id="expression2"></parameter>
+      <parameter id="expression3"></parameter>
+      <parameter id="useSingleExpression" value="true"/>
+      <parameter id="symbols"></parameter>
+      <parameter id="clearImageCacheAndExit" value="false"/>
+      <parameter id="cacheGeneratedImages" value="false"/>
+      <parameter id="generateOutput" value="true"/>
+      <parameter id="singleThreaded" value="false"/>
+      <parameter id="optimization" value="true"/>
+      <parameter id="use64BitWorkingImage" value="false"/>
+      <parameter id="rescale" value="false"/>
+      <parameter id="rescaleLower" value="0"/>
+      <parameter id="rescaleUpper" value="1"/>
+      <parameter id="truncate" value="true"/>
+      <parameter id="truncateLower" value="0"/>
+      <parameter id="truncateUpper" value="1"/>
+      <parameter id="createNewImage" value="true"/>
+      <parameter id="showNewImage" value="true"/>
+      <parameter id="newImageId">Starless</parameter>
+      <parameter id="newImageWidth" value="0"/>
+      <parameter id="newImageHeight" value="0"/>
+      <parameter id="newImageAlpha" value="false"/>
+      <parameter id="newImageColorSpace" value="SameAsTarget"/>
+      <parameter id="newImageSampleFormat" value="SameAsTarget"/>
+      <table id="outputData" rows="0"/>
+   </instance>
+   <instance class="PixelMath" version="256" id="StarReductionMethod1_V3_instance">
+      <parameter id="expression">/*      Star Reduction using PixelMath, by Bill Blanshan -
+                      Transfer Method - V3                          */
+
+S=   0.20       ;// &lt;--To reduce stars size more, lower &quot;S&quot; value
+Img1= Starless  ;// &lt;--Starless image name, yours must match
+
+/*
+
+Drag bottom left arrow over to the image you require star reduction
+
+Enjoy!!
+
+*/
+
+
+
+
+
+
+
+
+
+
+
+//equations
+~((~mtf(~S,$T)/~mtf(~S,Img1))*~Img1); //Transfer method</parameter>
+      <parameter id="expression1"></parameter>
+      <parameter id="expression2"></parameter>
+      <parameter id="expression3"></parameter>
+      <parameter id="useSingleExpression" value="true"/>
+      <parameter id="symbols">S,B,Img1,Img2,f1</parameter>
+      <parameter id="clearImageCacheAndExit" value="false"/>
+      <parameter id="cacheGeneratedImages" value="false"/>
+      <parameter id="generateOutput" value="true"/>
+      <parameter id="singleThreaded" value="false"/>
+      <parameter id="optimization" value="true"/>
+      <parameter id="use64BitWorkingImage" value="false"/>
+      <parameter id="rescale" value="false"/>
+      <parameter id="rescaleLower" value="0"/>
+      <parameter id="rescaleUpper" value="1"/>
+      <parameter id="truncate" value="true"/>
+      <parameter id="truncateLower" value="0"/>
+      <parameter id="truncateUpper" value="1"/>
+      <parameter id="createNewImage" value="false"/>
+      <parameter id="showNewImage" value="true"/>
+      <parameter id="newImageId">StarsReduced</parameter>
+      <parameter id="newImageWidth" value="0"/>
+      <parameter id="newImageHeight" value="0"/>
+      <parameter id="newImageAlpha" value="false"/>
+      <parameter id="newImageColorSpace" value="SameAsTarget"/>
+      <parameter id="newImageSampleFormat" value="SameAsTarget"/>
+      <table id="outputData" rows="0"/>
+   </instance>
+   <instance class="PixelMath" version="256" id="StarReductionMethod2_V3_instance">
+      <parameter id="expression">/*      Star Reduction using PixelMath, by Bill Blanshan -
+                      Halo Method - V3                            */
+
+S=   0.20        ;// &lt;--To reduce stars size more, lower &quot;S&quot; value
+Img1= Starless   ;// &lt;--Starless image name, yours must match
+
+
+/*
+
+Drag bottom left arrow over to the image you require star reduction
+
+
+Enjoy!!
+
+
+*/
+
+
+
+
+
+
+
+//equations
+
+f2= ((~(~$T/~Img1)-~(~mtf(~S,$T)/~mtf(~S,Img1)))*~Img1);
+f3= (~(~$T/~Img1)-~(~mtf(~S,$T)/~mtf(~S,Img1)));
+
+mean($T-mean(f2,f3),$T*~mean(f2,f3))</parameter>
+      <parameter id="expression1"></parameter>
+      <parameter id="expression2"></parameter>
+      <parameter id="expression3"></parameter>
+      <parameter id="useSingleExpression" value="true"/>
+      <parameter id="symbols">S,B,Img1,f2,f3,</parameter>
+      <parameter id="clearImageCacheAndExit" value="false"/>
+      <parameter id="cacheGeneratedImages" value="false"/>
+      <parameter id="generateOutput" value="true"/>
+      <parameter id="singleThreaded" value="false"/>
+      <parameter id="optimization" value="true"/>
+      <parameter id="use64BitWorkingImage" value="false"/>
+      <parameter id="rescale" value="false"/>
+      <parameter id="rescaleLower" value="0"/>
+      <parameter id="rescaleUpper" value="1"/>
+      <parameter id="truncate" value="true"/>
+      <parameter id="truncateLower" value="0"/>
+      <parameter id="truncateUpper" value="1"/>
+      <parameter id="createNewImage" value="false"/>
+      <parameter id="showNewImage" value="true"/>
+      <parameter id="newImageId">StarsReduced</parameter>
+      <parameter id="newImageWidth" value="0"/>
+      <parameter id="newImageHeight" value="0"/>
+      <parameter id="newImageAlpha" value="false"/>
+      <parameter id="newImageColorSpace" value="SameAsTarget"/>
+      <parameter id="newImageSampleFormat" value="SameAsTarget"/>
+      <table id="outputData" rows="0"/>
+   </instance>
+   <instance class="PixelMath" version="256" id="StarReductionMethod3_V3_instance">
+      <parameter id="expression">/*      Star Reduction using PixelMath, by Bill Blanshan -
+                      Star Method - V3                            */
+
+Img1= Starless  ;// &lt;--Starless Image name
+
+I=   1  ;// &lt;--number of iterations, between 1-3
+M=   3  ;// &lt;--Method mode; 1=Strong; 2=Moderate; 3=Soft reductions
+
+/*  Drag bottom left arrow over to the image you require star reduction
+
+Note:
+   Strong mode produces smaller sharp stars while removing small stars
+   Moderate mode still has sharp stars and some smaller stars
+   Soft mode is a simple star reduction of the original image       */
+
+
+
+
+
+
+
+
+
+
+
+//equations:
+E1= $T*~(~(max(0,min(1,Img1/$T)))*~$T);  //iteration-1
+E2= max(E1,($T*E1)+(E1*~E1));
+
+E3= E1*~(~(max(0,min(1,Img1/E1)))*~E1);  //iteration-2
+E4= max(E3,($T*E3)+(E3*~E3));
+
+E5= E3*~(~(max(0,min(1,Img1/E3)))*~E3);  //iteration-3
+E6= max(E5,($T*E5)+(E5*~E5));
+
+E7= iif(I==1,E1,iif(I==2,E3,E5)); // Strong reduction mode
+E8= iif(I==1,E2,iif(I==2,E4,E6)); // Moderate reduction mode
+
+E9= mean(
+$T-($T-iif(I==1,E2,iif(I==2,E4,E6))), 
+$T*~($T-iif(I==1,E2,iif(I==2,E4,E6)))); //soft reduction mode
+
+iif(M==1,E7,iif(M==2,E8,E9))</parameter>
+      <parameter id="expression1"></parameter>
+      <parameter id="expression2"></parameter>
+      <parameter id="expression3"></parameter>
+      <parameter id="useSingleExpression" value="true"/>
+      <parameter id="symbols">I,M,Img1,E1,E2,E3,E4,E5,E6,E7,E8,E9,E10,</parameter>
+      <parameter id="clearImageCacheAndExit" value="false"/>
+      <parameter id="cacheGeneratedImages" value="false"/>
+      <parameter id="generateOutput" value="true"/>
+      <parameter id="singleThreaded" value="false"/>
+      <parameter id="optimization" value="true"/>
+      <parameter id="use64BitWorkingImage" value="false"/>
+      <parameter id="rescale" value="false"/>
+      <parameter id="rescaleLower" value="0"/>
+      <parameter id="rescaleUpper" value="1"/>
+      <parameter id="truncate" value="true"/>
+      <parameter id="truncateLower" value="0"/>
+      <parameter id="truncateUpper" value="1"/>
+      <parameter id="createNewImage" value="false"/>
+      <parameter id="showNewImage" value="true"/>
+      <parameter id="newImageId">StarReduction</parameter>
+      <parameter id="newImageWidth" value="0"/>
+      <parameter id="newImageHeight" value="0"/>
+      <parameter id="newImageAlpha" value="false"/>
+      <parameter id="newImageColorSpace" value="SameAsTarget"/>
+      <parameter id="newImageSampleFormat" value="i8"/>
+      <table id="outputData" rows="0"/>
+   </instance>
+   <instance class="PixelMath" version="256" id="AddLightnessToRGB_V1_instance">
+      <parameter id="expression">/*        Add Lightness to an RGB Image via Pixelmath - V1
+                      by Bill Blanshan                     */
+                    
+
+//Drag the bottom left arrow over to your RGB image
+
+
+Img1=      L  ; // &lt;--  &quot;Lightness&quot; or luminance image name
+Strength= 1.00; // &lt;-- Increase &gt;1: brighter, &lt;1: darker
+                       
+
+
+
+
+
+
+
+
+
+//Equations
+E1= (Img1*mtf(1/Strength*.5,Img1))+(Img1*~Img1);//&lt;--Strength adjust
+
+// RGB to L.a.b
+R1= iif($T[0]&gt;0.04045, (($T[0]+0.055)/1.055)^ 2.4,$T[0]/ 12.92);
+G1= iif($T[1]&gt;0.04045, (($T[1]+0.055)/1.055)^ 2.4,$T[1]/ 12.92);
+B1= iif($T[2]&gt;0.04045, (($T[2]+0.055)/1.055)^ 2.4,$T[2]/ 12.92);
+X= ((R1*0.4360747) + (G1*0.3850649) + (B1*0.1430804));
+Y= ((R1*0.2225045) + (G1*0.7168786) + (B1*0.0606169));
+Z= ((R1*0.0139322) + (G1*0.0971045) + (B1*0.7141733));
+X1= iif(X&gt;0.008856, X^(1/3),(7.787*X)+(16/116) );
+Y1= iif(Y&gt;0.008856, Y^(1/3),(7.787*Y)+(16/116) );
+Z1= iif(Z&gt;0.008856, Z^(1/3),(7.787*Z)+(16/116) );
+L= 116*Y1-16;  
+a= (500*(X1-Y1)); 
+b= (200*(Y1-Z1)); 
+
+// L.a.b to RGB
+Y2= (E1+.16)/1.16;
+X2= (a/500)+Y2;
+Z2= Y2-(b/200);
+X3= iif(X2&gt;0.008856, X2^3,(X2-16/116)/7.787);
+X3= iif(X2&gt;0.008856, X2^3,(X2-16/116)/7.787);
+Y3= iif(Y2&gt;0.008856, Y2^3,(Y2-16/116)/7.787);
+Z3= iif(Z2&gt;0.008856, Z2^3,(Z2-16/116)/7.787);
+R2= ((X3* 3.1338561) + (Y3*-1.6168667) + (Z3*-0.4906146));
+G2= ((X3*-0.9787684) + (Y3* 1.9161415) + (Z3* 0.0334540));
+B2= ((X3* 0.0719453) + (Y3*-0.2289914) + (Z3* 1.4052427));
+R3= iif(R2&gt;0.0031308, 1.055*(R2^(1/2.4))-0.055,12.92*R2);
+G3= iif(G2&gt;0.0031308, 1.055*(G2^(1/2.4))-0.055,12.92*G2);
+B3= iif(B2&gt;0.0031308, 1.055*(B2^(1/2.4))-0.055,12.92*B2);
+
+iif($T==$T[0],R3,iif($T==$T[1],G3,B3))</parameter>
+      <parameter id="expression1"></parameter>
+      <parameter id="expression2"></parameter>
+      <parameter id="expression3"></parameter>
+      <parameter id="useSingleExpression" value="true"/>
+      <parameter id="symbols">R1,G1,B1,R2,G2,B2,R3,G3,B3,
+X,Y,Z,X1,Y1,Z1,X2,Y2,Z2,X3,Y3,Z3,
+L,a,b,Img1,
+Strength,E1,</parameter>
+      <parameter id="clearImageCacheAndExit" value="false"/>
+      <parameter id="cacheGeneratedImages" value="false"/>
+      <parameter id="generateOutput" value="true"/>
+      <parameter id="singleThreaded" value="false"/>
+      <parameter id="optimization" value="true"/>
+      <parameter id="use64BitWorkingImage" value="false"/>
+      <parameter id="rescale" value="false"/>
+      <parameter id="rescaleLower" value="0"/>
+      <parameter id="rescaleUpper" value="1"/>
+      <parameter id="truncate" value="true"/>
+      <parameter id="truncateLower" value="0"/>
+      <parameter id="truncateUpper" value="1"/>
+      <parameter id="createNewImage" value="true"/>
+      <parameter id="showNewImage" value="true"/>
+      <parameter id="newImageId">LRGB</parameter>
+      <parameter id="newImageWidth" value="0"/>
+      <parameter id="newImageHeight" value="0"/>
+      <parameter id="newImageAlpha" value="false"/>
+      <parameter id="newImageColorSpace" value="SameAsTarget"/>
+      <parameter id="newImageSampleFormat" value="SameAsTarget"/>
+      <table id="outputData" rows="0"/>
+   </instance>
+   <instance class="PixelMath" version="256" id="CloneForStarless_NB_instance">
+      <time start="2022-10-14T19:52:21.652Z" span="0.7258839"/>
+      <parameter id="expression">$T</parameter>
+      <parameter id="expression1"></parameter>
+      <parameter id="expression2"></parameter>
+      <parameter id="expression3"></parameter>
+      <parameter id="useSingleExpression" value="true"/>
+      <parameter id="symbols"></parameter>
+      <parameter id="clearImageCacheAndExit" value="false"/>
+      <parameter id="cacheGeneratedImages" value="false"/>
+      <parameter id="generateOutput" value="true"/>
+      <parameter id="singleThreaded" value="false"/>
+      <parameter id="optimization" value="true"/>
+      <parameter id="use64BitWorkingImage" value="false"/>
+      <parameter id="rescale" value="false"/>
+      <parameter id="rescaleLower" value="0"/>
+      <parameter id="rescaleUpper" value="1"/>
+      <parameter id="truncate" value="true"/>
+      <parameter id="truncateLower" value="0"/>
+      <parameter id="truncateUpper" value="1"/>
+      <parameter id="createNewImage" value="true"/>
+      <parameter id="showNewImage" value="true"/>
+      <parameter id="newImageId">Starless_NB</parameter>
+      <parameter id="newImageWidth" value="0"/>
+      <parameter id="newImageHeight" value="0"/>
+      <parameter id="newImageAlpha" value="false"/>
+      <parameter id="newImageColorSpace" value="SameAsTarget"/>
+      <parameter id="newImageSampleFormat" value="SameAsTarget"/>
+      <table id="outputData" rows="0"/>
+   </instance>
+   <instance class="PixelMath" version="256" id="CloneForStarless_RGB_instance">
+      <time start="2022-10-14T19:50:29.677Z" span="0.7324422"/>
+      <parameter id="expression">$T</parameter>
+      <parameter id="expression1"></parameter>
+      <parameter id="expression2"></parameter>
+      <parameter id="expression3"></parameter>
+      <parameter id="useSingleExpression" value="true"/>
+      <parameter id="symbols"></parameter>
+      <parameter id="clearImageCacheAndExit" value="false"/>
+      <parameter id="cacheGeneratedImages" value="false"/>
+      <parameter id="generateOutput" value="true"/>
+      <parameter id="singleThreaded" value="false"/>
+      <parameter id="optimization" value="true"/>
+      <parameter id="use64BitWorkingImage" value="false"/>
+      <parameter id="rescale" value="false"/>
+      <parameter id="rescaleLower" value="0"/>
+      <parameter id="rescaleUpper" value="1"/>
+      <parameter id="truncate" value="true"/>
+      <parameter id="truncateLower" value="0"/>
+      <parameter id="truncateUpper" value="1"/>
+      <parameter id="createNewImage" value="true"/>
+      <parameter id="showNewImage" value="true"/>
+      <parameter id="newImageId">Starless_RGB</parameter>
+      <parameter id="newImageWidth" value="0"/>
+      <parameter id="newImageHeight" value="0"/>
+      <parameter id="newImageAlpha" value="false"/>
+      <parameter id="newImageColorSpace" value="SameAsTarget"/>
+      <parameter id="newImageSampleFormat" value="SameAsTarget"/>
+      <table id="outputData" rows="0"/>
+   </instance>
+   <instance class="PixelMath" version="256" id="RGBstars_to_NB_V14_instance">
+      <parameter id="expression">/*      RGB Stars-to-Narrowband Transfer using PixelMath - V14 
+                     by Bill Blanshan                          */
+                    
+//Drag the bottom left arrow over to your RGB image with stars
+
+Img1= Starless_RGB   ;// &lt;-- RGB Starless Image name
+Img2= Starless_NB    ;// &lt;-- Narrowband Starless Image name
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//Equations.....
+S= 0.05;  //Forward and reverse stretch control
+I1= min(.999,$T);//&lt;--Protects image when dividing
+I2= min(.999,Img1);//&lt;--Protects image when dividing
+I3= min(.999,Img2);//&lt;--Protects image when dividing
+E1= mtf(~S,I1); //&lt;--Reverse Stretch-RGB image
+E2= mtf(~S,I2); //&lt;--Reverse Stretch-RGB Starless image
+E3= mtf(~S,I3);  //&lt;--Reverse Stretch-NB Starless image
+E4= rescale(~(~E1/~E2),0,1); //&lt;--Reverse Stretch-Unscreen Stars
+E5= rescale(~(~I1/~I2),0,1);  //&lt;--Unscreen Stars
+E6= min(.999,~(~E5*~I3)); //&lt;--Use for Lightness
+
+E9= E5[0]*0.2126+E5[1]*0.7152+E5[2]*0.0722; //&lt;-Star mask
+E10= rescale(E9,0,.50); 
+
+// Create New Lightness
+R= iif(E6[0]&gt;0.04045, ((E6[0]+0.055)/1.055)^ 2.4,E6[0]/ 12.92);
+G= iif(E6[1]&gt;0.04045, ((E6[1]+0.055)/1.055)^ 2.4,E6[1]/ 12.92);
+B= iif(E6[2]&gt;0.04045, ((E6[2]+0.055)/1.055)^ 2.4,E6[2]/ 12.92);
+Y_= ((R*0.2225045) + (G*0.7168786) + (B*0.0606169));
+Y1_= iif(Y_&gt;0.008856, Y_^(1/3),(7.787*Y_)+(16/116) );
+L_= 116*Y1_-16; 
+ 
+E16= mtf(S,~(~E4*(~E3/~(~(~E3/~E2)*E10))) );//&lt;--
+
+R1= iif(E16[0]&gt;0.04045, ((E16[0]+0.055)/1.055)^ 2.4,E16[0]/ 12.92);
+G1= iif(E16[1]&gt;0.04045, ((E16[1]+0.055)/1.055)^ 2.4,E16[1]/ 12.92);
+B1= iif(E16[2]&gt;0.04045, ((E16[2]+0.055)/1.055)^ 2.4,E16[2]/ 12.92);
+
+X= ((R1*0.4360747) + (G1*0.3850649) + (B1*0.1430804));
+Y= ((R1*0.2225045) + (G1*0.7168786) + (B1*0.0606169));
+Z= ((R1*0.0139322) + (G1*0.0971045) + (B1*0.7141733));
+X1= iif(X&gt;0.008856, X^(1/3),(7.787*X)+(16/116) );
+Y1= iif(Y&gt;0.008856, Y^(1/3),(7.787*Y)+(16/116) );
+Z1= iif(Z&gt;0.008856, Z^(1/3),(7.787*Z)+(16/116) );
+L= 116*Y1-16;  
+a= (500*(X1-Y1));  
+b= (200*(Y1-Z1));   
+
+Y2= (L_+16)/116;
+X2= (a/500)+Y2;
+Z2= Y2-(b/200);
+X3= iif(X2&gt;0.008856, X2^3,(X2-16/116)/7.787);
+Y3= iif(Y2&gt;0.008856, Y2^3,(Y2-16/116)/7.787);
+Z3= iif(Z2&gt;0.008856, Z2^3,(Z2-16/116)/7.787);
+R2= ((X3* 3.1338561) + (Y3*-1.6168667) + (Z3*-0.4906146));
+G2= ((X3*-0.9787684) + (Y3* 1.9161415) + (Z3* 0.0334540));
+B2= ((X3* 0.0719453) + (Y3*-0.2289914) + (Z3* 1.4052427));
+R3= iif(R2&gt;0.0031308, 1.055*(R2^(1/2.4))-0.055,12.92*R2);
+G3= iif(G2&gt;0.0031308, 1.055*(G2^(1/2.4))-0.055,12.92*G2);
+B3= iif(B2&gt;0.0031308, 1.055*(B2^(1/2.4))-0.055,12.92*B2);
+
+E18= iif($T==$T[0],R3,iif($T==$T[1],G3,B3)) ;
+
+E18</parameter>
+      <parameter id="expression1"></parameter>
+      <parameter id="expression2"></parameter>
+      <parameter id="expression3"></parameter>
+      <parameter id="useSingleExpression" value="true"/>
+      <parameter id="symbols">Img1,Img2,S,M,I1,I2,I3,
+E0,E1,E2,E3,E4,E5,E6,E7,E8,E9,E10,E11,E12,E13,E14,E15,E16,E17,E18,E19,
+E20,E21,E22,E23,E24,E25,E26,E27,E28,E29,E30,E31,E32,E33,E34,E35,
+R,G,B,R1,G1,B1,R2,G2,B2,R3,G3,B3,L,a,b,Y_,Y1_,L_,
+X,Y,Z,X1,Y1,Z1,X2,Y2,Z2,X3,Y3,Z3,</parameter>
+      <parameter id="clearImageCacheAndExit" value="false"/>
+      <parameter id="cacheGeneratedImages" value="false"/>
+      <parameter id="generateOutput" value="true"/>
+      <parameter id="singleThreaded" value="false"/>
+      <parameter id="optimization" value="true"/>
+      <parameter id="use64BitWorkingImage" value="false"/>
+      <parameter id="rescale" value="false"/>
+      <parameter id="rescaleLower" value="0"/>
+      <parameter id="rescaleUpper" value="1"/>
+      <parameter id="truncate" value="true"/>
+      <parameter id="truncateLower" value="0"/>
+      <parameter id="truncateUpper" value="1"/>
+      <parameter id="createNewImage" value="true"/>
+      <parameter id="showNewImage" value="true"/>
+      <parameter id="newImageId">RGB_NB</parameter>
+      <parameter id="newImageWidth" value="0"/>
+      <parameter id="newImageHeight" value="0"/>
+      <parameter id="newImageAlpha" value="false"/>
+      <parameter id="newImageColorSpace" value="SameAsTarget"/>
+      <parameter id="newImageSampleFormat" value="SameAsTarget"/>
+      <table id="outputData" rows="0"/>
+   </instance>
+   <instance class="PixelMath" version="256" id="CloneForStarless_Ha__instance">
+      <time start="2022-12-08T23:06:33.278Z" span="0.6720885"/>
+      <parameter id="expression">$T</parameter>
+      <parameter id="expression1"></parameter>
+      <parameter id="expression2"></parameter>
+      <parameter id="expression3"></parameter>
+      <parameter id="useSingleExpression" value="true"/>
+      <parameter id="symbols"></parameter>
+      <parameter id="clearImageCacheAndExit" value="false"/>
+      <parameter id="cacheGeneratedImages" value="false"/>
+      <parameter id="generateOutput" value="true"/>
+      <parameter id="singleThreaded" value="false"/>
+      <parameter id="optimization" value="true"/>
+      <parameter id="use64BitWorkingImage" value="false"/>
+      <parameter id="rescale" value="false"/>
+      <parameter id="rescaleLower" value="0"/>
+      <parameter id="rescaleUpper" value="1"/>
+      <parameter id="truncate" value="true"/>
+      <parameter id="truncateLower" value="0"/>
+      <parameter id="truncateUpper" value="1"/>
+      <parameter id="createNewImage" value="true"/>
+      <parameter id="showNewImage" value="true"/>
+      <parameter id="newImageId">Starless_Ha</parameter>
+      <parameter id="newImageWidth" value="0"/>
+      <parameter id="newImageHeight" value="0"/>
+      <parameter id="newImageAlpha" value="false"/>
+      <parameter id="newImageColorSpace" value="SameAsTarget"/>
+      <parameter id="newImageSampleFormat" value="SameAsTarget"/>
+      <table id="outputData" rows="0"/>
+   </instance>
+   <instance class="PixelMath" version="256" id="Ha_to_RGB_Nebula_Simple_V1_instance">
+      <time start="2022-12-10T22:04:03.612Z" span="4.6938932"/>
+      <parameter id="expression">/*    Add Ha to RGB Image - Nebula Simple Mode - V1 
+                   by Bill Blanshan              */
+
+Brightness=  1.0 ;// Brightness control,&gt;1: brighter
+
+/*Important for this to work!! Your Ha image must be named &quot;Ha&quot; 
+
+Drag the bottom left arrow over to your RGB image
+
+Hope you enjoy!!!      */
+
+
+
+
+
+
+
+
+
+k= adev($T[0])/adev(Ha);
+E1= (k*(Ha-med(Ha))+med($T[0]));//&lt;--Normalized Ha
+E2= ~(~$T[0]*~(rescale(~(~Ha/~$T[0]),0,1)));// Add Ha to Red
+E3= mtf((1/Brightness*.5),Ha);//&lt;-- Ha Stretch for Lightness
+E4= (Ha*E3)+(Ha*~Ha);//&lt;New Lightness
+
+// RGB to L.a.b
+R1= iif(E2&gt;0.04045, ((E2+0.055)/1.055)^ 2.4,E2/ 12.92);
+G1= iif($T[1]&gt;0.04045, (($T[1]+0.055)/1.055)^ 2.4,$T[1]/ 12.92);
+B1= iif($T[2]&gt;0.04045, (($T[2]+0.055)/1.055)^ 2.4,$T[2]/ 12.92);
+X= ((R1*0.4360747) + (G1*0.3850649) + (B1*0.1430804));
+Y= ((R1*0.2225045) + (G1*0.7168786) + (B1*0.0606169));
+Z= ((R1*0.0139322) + (G1*0.0971045) + (B1*0.7141733));
+X1= iif(X&gt;0.008856, X^(1/3),(7.787*X)+(16/116) );
+Y1= iif(Y&gt;0.008856, Y^(1/3),(7.787*Y)+(16/116) );
+Z1= iif(Z&gt;0.008856, Z^(1/3),(7.787*Z)+(16/116) );
+L= 116*Y1-16;  
+a= (500*(X1-Y1)); 
+b= (200*(Y1-Z1)); 
+
+// L.a.b to RGB
+Y2= (E4+.16)/1.16;
+X2= (a/500)+Y2;
+Z2= Y2-(b/200);
+X3= iif(X2&gt;0.008856, X2^3,(X2-16/116)/7.787);
+Y3= iif(Y2&gt;0.008856, Y2^3,(Y2-16/116)/7.787);
+Z3= iif(Z2&gt;0.008856, Z2^3,(Z2-16/116)/7.787);
+R2= ((X3* 3.1338561) + (Y3*-1.6168667) + (Z3*-0.4906146));
+G2= ((X3*-0.9787684) + (Y3* 1.9161415) + (Z3* 0.0334540));
+B2= ((X3* 0.0719453) + (Y3*-0.2289914) + (Z3* 1.4052427));
+R3= iif(R2&gt;0.0031308, 1.055*(R2^(1/2.4))-0.055,12.92*R2);
+G3= iif(G2&gt;0.0031308, 1.055*(G2^(1/2.4))-0.055,12.92*G2);
+B3= iif(B2&gt;0.0031308, 1.055*(B2^(1/2.4))-0.055,12.92*B2);
+
+iif($T==$T[0],R3,iif($T==$T[1],G3,B3))</parameter>
+      <parameter id="expression1"></parameter>
+      <parameter id="expression2"></parameter>
+      <parameter id="expression3"></parameter>
+      <parameter id="useSingleExpression" value="true"/>
+      <parameter id="symbols">Brightness,k,E1,E2,E3,E4,
+R1,G1,B1,R2,G2,B2,R3,G3,B3,
+X,Y,Z,X1,Y1,Z1,X2,Y2,Z2,X3,Y3,Z3,
+L,a,b,</parameter>
+      <parameter id="clearImageCacheAndExit" value="false"/>
+      <parameter id="cacheGeneratedImages" value="false"/>
+      <parameter id="generateOutput" value="true"/>
+      <parameter id="singleThreaded" value="false"/>
+      <parameter id="optimization" value="true"/>
+      <parameter id="use64BitWorkingImage" value="false"/>
+      <parameter id="rescale" value="false"/>
+      <parameter id="rescaleLower" value="0"/>
+      <parameter id="rescaleUpper" value="1"/>
+      <parameter id="truncate" value="true"/>
+      <parameter id="truncateLower" value="0"/>
+      <parameter id="truncateUpper" value="1"/>
+      <parameter id="createNewImage" value="true"/>
+      <parameter id="showNewImage" value="true"/>
+      <parameter id="newImageId">HaRGB</parameter>
+      <parameter id="newImageWidth" value="0"/>
+      <parameter id="newImageHeight" value="0"/>
+      <parameter id="newImageAlpha" value="false"/>
+      <parameter id="newImageColorSpace" value="SameAsTarget"/>
+      <parameter id="newImageSampleFormat" value="SameAsTarget"/>
+      <table id="outputData" rows="0"/>
+   </instance>
+   <instance class="PixelMath" version="256" id="CloneForStarless_RGB__instance">
+      <time start="2022-12-08T23:10:15.572Z" span="0.7037143"/>
+      <parameter id="expression">$T</parameter>
+      <parameter id="expression1"></parameter>
+      <parameter id="expression2"></parameter>
+      <parameter id="expression3"></parameter>
+      <parameter id="useSingleExpression" value="true"/>
+      <parameter id="symbols"></parameter>
+      <parameter id="clearImageCacheAndExit" value="false"/>
+      <parameter id="cacheGeneratedImages" value="false"/>
+      <parameter id="generateOutput" value="true"/>
+      <parameter id="singleThreaded" value="false"/>
+      <parameter id="optimization" value="true"/>
+      <parameter id="use64BitWorkingImage" value="false"/>
+      <parameter id="rescale" value="false"/>
+      <parameter id="rescaleLower" value="0"/>
+      <parameter id="rescaleUpper" value="1"/>
+      <parameter id="truncate" value="true"/>
+      <parameter id="truncateLower" value="0"/>
+      <parameter id="truncateUpper" value="1"/>
+      <parameter id="createNewImage" value="true"/>
+      <parameter id="showNewImage" value="true"/>
+      <parameter id="newImageId">Starless_RGB</parameter>
+      <parameter id="newImageWidth" value="0"/>
+      <parameter id="newImageHeight" value="0"/>
+      <parameter id="newImageAlpha" value="false"/>
+      <parameter id="newImageColorSpace" value="SameAsTarget"/>
+      <parameter id="newImageSampleFormat" value="SameAsTarget"/>
+      <table id="outputData" rows="0"/>
+   </instance>
+   <instance class="PixelMath" version="256" id="Ha_to_RGB_Advanced_V1_instance">
+      <parameter id="expression">/*  Add Ha to RGB Image with Ha Lightness - Advanced Mode-V1 
+                    by Bill Blanshan                */
+
+Mode=         0   ;//0: Nebula mode, 1: Galaxy mode
+StarMode=     0   ;// 0: RGB Stars, 1: Ha Stars, 2: Blend
+Brightness=  1.00 ;// Lightness brightness control,&lt;1: darker
+HaStrength=  1.00 ;/* Increase Ha region brightness,&gt;1: brighter
+
+
+Important for this to work!!
+1) Your Ha image must be named &quot;Ha&quot; 
+2) Your Starless Ha image must be named &quot;Starless_Ha&quot;
+3) Your Starless RGB image must be named &quot;Starless_RGB&quot;       
+
+Drag the bottom left arrow over to your RGB image
+
+Hope you enjoy!!!      */
+
+
+
+
+
+
+
+
+
+
+
+
+
+// Normalize Ha to Red or RGB to HA
+k1= adev(Starless_RGB[0])/adev(Starless_Ha); 
+k2= adev(Starless_Ha)/adev(Starless_RGB[0]); 
+N1= (k1*(Starless_Ha-med(Starless_Ha))+med(Starless_RGB[0]));//Ha
+N2= (k2*(Starless_RGB[0]-med(Starless_RGB[0]))+med(Starless_Ha));//R
+N3= rescale(~(~Starless_Ha/~N2),0,1); //Ha-(Red normalized to Ha)
+N4= rescale(~(~N1/~Starless_RGB[0]),0,1);//Ha-(Ha normalized to Red)
+N5= iif(k1&gt;k2,N3,N4); //Final Ha only
+N6= ~((~$T[0]/~Starless_RGB[0])*(~Starless_RGB[0]*~N5));//New Red
+
+////New Lightness
+E1= ~(~CIEL($T)/~CIEL(Starless_RGB)); //&lt;--Unscreen RGB Stars &quot;L&quot;
+E2= ~(~CIEL(Ha)/~CIEL(Starless_Ha)); //&lt;--Unscreen Ha Stars &quot;L&quot;
+E3= max(mdev($T[0]),mdev($T[1]),mdev($T[2]),
+    mdev(Starless_Ha))/4;
+E4= mtf((1/HaStrength*.5),N5-E3);//Ha diff with Stretch
+E5= iif(Mode==0,Starless_Ha,
+    ~(~CIEL(Starless_RGB)*~E4));// New Lightness
+E6= (E5*(Brightness*E5))+(E5*~E5); //New Lightness adjusted
+E7= iswitch(StarMode==0,~(~E1*~E6),StarMode==1,~(~E2*~E6),
+    mean(~(~E1*~E6),~(~E2*~E6))); //New lightness with Stars
+
+// RGB to L.a.b 
+R1= iif(N6&gt;0.04045, ((N6+0.055)/1.055)^ 2.4,N6/ 12.92);
+G1= iif($T[1]&gt;0.04045, (($T[1]+0.055)/1.055)^ 2.4,$T[1]/ 12.92);
+B1= iif($T[2]&gt;0.04045, (($T[2]+0.055)/1.055)^ 2.4,$T[2]/ 12.92);
+X= ((R1*0.4360747) + (G1*0.3850649) + (B1*0.1430804));
+Y= ((R1*0.2225045) + (G1*0.7168786) + (B1*0.0606169));
+Z= ((R1*0.0139322) + (G1*0.0971045) + (B1*0.7141733));
+X1= iif(X&gt;0.008856, X^(1/3),(7.787*X)+(16/116) );
+Y1= iif(Y&gt;0.008856, Y^(1/3),(7.787*Y)+(16/116) );
+Z1= iif(Z&gt;0.008856, Z^(1/3),(7.787*Z)+(16/116) );
+L= 116*Y1-16;  
+a= (500*(X1-Y1));  
+b= (200*(Y1-Z1));   
+
+// L.a.b to RGB
+Y2= (E7+.16)/1.16;
+X2= (a/500)+Y2;
+Z2= Y2-(b/200);
+X3= iif(X2&gt;0.008856, X2^3,(X2-16/116)/7.787);
+Y3= iif(Y2&gt;0.008856, Y2^3,(Y2-16/116)/7.787);
+Z3= iif(Z2&gt;0.008856, Z2^3,(Z2-16/116)/7.787);
+R2= ((X3* 3.1338561) + (Y3*-1.6168667) + (Z3*-0.4906146));
+G2= ((X3*-0.9787684) + (Y3* 1.9161415) + (Z3* 0.0334540));
+B2= ((X3* 0.0719453) + (Y3*-0.2289914) + (Z3* 1.4052427));
+R3= iif(R2&gt;0.0031308, 1.055*(R2^(1/2.4))-0.055,12.92*R2);
+G3= iif(G2&gt;0.0031308, 1.055*(G2^(1/2.4))-0.055,12.92*G2);
+B3= iif(B2&gt;0.0031308, 1.055*(B2^(1/2.4))-0.055,12.92*B2);
+
+iif($T==$T[0],R3,iif($T==$T[1],G3,B3)); //Final
+
+
+
+
+/*Notes: Brightness adjustment is a linear stretch of the starless
+         data where as HaStrength adjustment is non-linear curve
+         adjustment stretch  */</parameter>
+      <parameter id="expression1"></parameter>
+      <parameter id="expression2"></parameter>
+      <parameter id="expression3"></parameter>
+      <parameter id="useSingleExpression" value="true"/>
+      <parameter id="symbols">StarMode,HaStrength,Brightness,Mode,
+k1,k2,N1,N2,N3,N4,N5,N6,
+I1,I2,I3,S1,S2,S3,
+E1,E2,E3,E4,E5,E6,E7,E8,
+R1,G1,B1,R2,G2,B2,R3,G3,B3,
+X,Y,Z,X1,Y1,Z1,X2,Y2,Z2,X3,Y3,Z3,
+L,a,b,</parameter>
+      <parameter id="clearImageCacheAndExit" value="false"/>
+      <parameter id="cacheGeneratedImages" value="false"/>
+      <parameter id="generateOutput" value="true"/>
+      <parameter id="singleThreaded" value="false"/>
+      <parameter id="optimization" value="true"/>
+      <parameter id="use64BitWorkingImage" value="false"/>
+      <parameter id="rescale" value="false"/>
+      <parameter id="rescaleLower" value="0"/>
+      <parameter id="rescaleUpper" value="1"/>
+      <parameter id="truncate" value="true"/>
+      <parameter id="truncateLower" value="0"/>
+      <parameter id="truncateUpper" value="1"/>
+      <parameter id="createNewImage" value="true"/>
+      <parameter id="showNewImage" value="true"/>
+      <parameter id="newImageId">HaRGB</parameter>
+      <parameter id="newImageWidth" value="0"/>
+      <parameter id="newImageHeight" value="0"/>
+      <parameter id="newImageAlpha" value="false"/>
+      <parameter id="newImageColorSpace" value="SameAsTarget"/>
+      <parameter id="newImageSampleFormat" value="SameAsTarget"/>
+      <table id="outputData" rows="0"/>
+   </instance>
+   <instance class="PixelMath" version="256" id="AddMyStat_instance">
+      <time start="2024-07-29T10:10:51.707Z" span="0.3156229"/>
+      <parameter id="expression">~(~star*1.01 * ~ $T)</parameter>
+      <parameter id="expression1"></parameter>
+      <parameter id="expression2"></parameter>
+      <parameter id="expression3"></parameter>
+      <parameter id="useSingleExpression" value="true"/>
+      <parameter id="symbols"></parameter>
+      <parameter id="clearImageCacheAndExit" value="false"/>
+      <parameter id="cacheGeneratedImages" value="false"/>
+      <parameter id="generateOutput" value="true"/>
+      <parameter id="singleThreaded" value="false"/>
+      <parameter id="optimization" value="true"/>
+      <parameter id="use64BitWorkingImage" value="false"/>
+      <parameter id="rescale" value="false"/>
+      <parameter id="rescaleLower" value="0"/>
+      <parameter id="rescaleUpper" value="1"/>
+      <parameter id="truncate" value="true"/>
+      <parameter id="truncateLower" value="0"/>
+      <parameter id="truncateUpper" value="1"/>
+      <parameter id="createNewImage" value="false"/>
+      <parameter id="showNewImage" value="true"/>
+      <parameter id="newImageId"></parameter>
+      <parameter id="newImageWidth" value="0"/>
+      <parameter id="newImageHeight" value="0"/>
+      <parameter id="newImageAlpha" value="false"/>
+      <parameter id="newImageColorSpace" value="SameAsTarget"/>
+      <parameter id="newImageSampleFormat" value="SameAsTarget"/>
+      <table id="outputData" rows="0"/>
+   </instance>
+   <instance class="ChannelCombination" version="256" id="iRGB_instance">
+      <parameter id="colorSpace" value="RGB"/>
+      <table id="channels" rows="3">
+         <tr>
+            <td id="enabled" value="true"/>
+            <td id="id">i_R</td>
+         </tr>
+         <tr>
+            <td id="enabled" value="true"/>
+            <td id="id">i_G</td>
+         </tr>
+         <tr>
+            <td id="enabled" value="true"/>
+            <td id="id">i_B</td>
+         </tr>
+      </table>
+      <parameter id="inheritAstrometricSolution" value="true"/>
+   </instance>
+   <instance class="ChannelCombination" version="256" id="zSHO_instance">
+      <parameter id="colorSpace" value="RGB"/>
+      <table id="channels" rows="3">
+         <tr>
+            <td id="enabled" value="true"/>
+            <td id="id">x_S</td>
+         </tr>
+         <tr>
+            <td id="enabled" value="true"/>
+            <td id="id">x_H</td>
+         </tr>
+         <tr>
+            <td id="enabled" value="true"/>
+            <td id="id">x_O</td>
+         </tr>
+      </table>
+      <parameter id="inheritAstrometricSolution" value="true"/>
+   </instance>
+   <instance class="LRGBCombination" version="256" id="GRGB_instance">
+      <table id="channels" rows="4">
+         <tr>
+            <td id="enabled" value="true"/>
+            <td id="id">RGB_R</td>
+            <td id="k" value="1.00000"/>
+         </tr>
+         <tr>
+            <td id="enabled" value="true"/>
+            <td id="id">RGB_G</td>
+            <td id="k" value="1.00000"/>
+         </tr>
+         <tr>
+            <td id="enabled" value="true"/>
+            <td id="id">RGB_B</td>
+            <td id="k" value="1.00000"/>
+         </tr>
+         <tr>
+            <td id="enabled" value="true"/>
+            <td id="id">RGB_G</td>
+            <td id="k" value="1.00000"/>
+         </tr>
+      </table>
+      <parameter id="mL" value="0.500"/>
+      <parameter id="mc" value="0.500"/>
+      <parameter id="clipHighlights" value="true"/>
+      <parameter id="noiseReduction" value="true"/>
+      <parameter id="layersRemoved" value="4"/>
+      <parameter id="layersProtected" value="2"/>
+      <parameter id="inheritAstrometricSolution" value="true"/>
+   </instance>
+   <instance class="StarAlignment" version="5" id="StarAligment_instance">
+      <parameter id="structureLayers" value="5"/>
+      <parameter id="noiseLayers" value="0"/>
+      <parameter id="hotPixelFilterRadius" value="1"/>
+      <parameter id="noiseReductionFilterRadius" value="0"/>
+      <parameter id="minStructureSize" value="0"/>
+      <parameter id="sensitivity" value="0.50"/>
+      <parameter id="peakResponse" value="0.50"/>
+      <parameter id="brightThreshold" value="3.00"/>
+      <parameter id="maxStarDistortion" value="0.60"/>
+      <parameter id="allowClusteredSources" value="false"/>
+      <parameter id="localMaximaDetectionLimit" value="0.75"/>
+      <parameter id="upperLimit" value="1.000"/>
+      <parameter id="invert" value="false"/>
+      <parameter id="distortionModel"></parameter>
+      <parameter id="undistortedReference" value="false"/>
+      <parameter id="rigidTransformations" value="false"/>
+      <parameter id="distortionCorrection" value="false"/>
+      <parameter id="distortionMaxIterations" value="20"/>
+      <parameter id="distortionMatcherExpansion" value="1.00"/>
+      <parameter id="rbfType" value="DDMThinPlateSpline"/>
+      <parameter id="maxSplinePoints" value="4000"/>
+      <parameter id="splineOrder" value="2"/>
+      <parameter id="splineSmoothness" value="0.005"/>
+      <parameter id="splineOutlierDetectionRadius" value="160"/>
+      <parameter id="splineOutlierDetectionMinThreshold" value="4.0"/>
+      <parameter id="splineOutlierDetectionSigma" value="5.0"/>
+      <parameter id="matcherTolerance" value="0.0500"/>
+      <parameter id="ransacTolerance" value="1.9000"/>
+      <parameter id="ransacMaxIterations" value="2000"/>
+      <parameter id="ransacMaximizeInliers" value="1.00"/>
+      <parameter id="ransacMaximizeOverlapping" value="1.00"/>
+      <parameter id="ransacMaximizeRegularity" value="1.00"/>
+      <parameter id="ransacMinimizeError" value="1.00"/>
+      <parameter id="maxStars" value="0"/>
+      <parameter id="fitPSF" value="FitPSF_DistortionOnly"/>
+      <parameter id="psfTolerance" value="0.50"/>
+      <parameter id="useTriangles" value="false"/>
+      <parameter id="polygonSides" value="5"/>
+      <parameter id="descriptorsPerStar" value="20"/>
+      <parameter id="restrictToPreviews" value="true"/>
+      <parameter id="intersection" value="MosaicOnly"/>
+      <parameter id="useBrightnessRelations" value="false"/>
+      <parameter id="useScaleDifferences" value="false"/>
+      <parameter id="scaleTolerance" value="0.100"/>
+      <parameter id="referenceImage">i_G</parameter>
+      <parameter id="referenceIsFile" value="false"/>
+      <table id="targets" rows="2">
+         <tr>
+            <td id="enabled" value="true"/>
+            <td id="isFile" value="false"/>
+            <td id="image">i_R</td>
+         </tr>
+         <tr>
+            <td id="enabled" value="true"/>
+            <td id="isFile" value="false"/>
+            <td id="image">i_B</td>
+         </tr>
+      </table>
+      <parameter id="inputHints"></parameter>
+      <parameter id="outputHints"></parameter>
+      <parameter id="mode" value="RegisterMatch"/>
+      <parameter id="writeKeywords" value="true"/>
+      <parameter id="generateMasks" value="false"/>
+      <parameter id="generateDrizzleData" value="true"/>
+      <parameter id="generateDistortionMaps" value="false"/>
+      <parameter id="generateHistoryProperties" value="true"/>
+      <parameter id="inheritAstrometricSolution" value="false"/>
+      <parameter id="frameAdaptation" value="false"/>
+      <parameter id="randomizeMosaic" value="false"/>
+      <parameter id="pixelInterpolation" value="Auto"/>
+      <parameter id="clampingThreshold" value="0.30"/>
+      <parameter id="outputDirectory"></parameter>
+      <parameter id="outputExtension">.xisf</parameter>
+      <parameter id="outputPrefix"></parameter>
+      <parameter id="outputPostfix">_r</parameter>
+      <parameter id="maskPostfix">_m</parameter>
+      <parameter id="distortionMapPostfix">_dm</parameter>
+      <parameter id="outputSampleFormat" value="SameAsTarget"/>
+      <parameter id="overwriteExistingFiles" value="false"/>
+      <parameter id="onError" value="Continue"/>
+      <parameter id="useFileThreads" value="true"/>
+      <parameter id="fileThreadOverload" value="1.00"/>
+      <parameter id="maxFileReadThreads" value="0"/>
+      <parameter id="maxFileWriteThreads" value="0"/>
+      <parameter id="memoryLoadControl" value="true"/>
+      <parameter id="memoryLoadLimit" value="0.85"/>
+      <table id="outputData" rows="0"/>
+   </instance>
+   <instance class="DynamicBackgroundExtraction" version="256" id="myDBE_instance">
+      <table id="data" rows="74">
+         <tr>
+            <td id="x" value="0.04057124"/>
+            <td id="y" value="0.06124939"/>
+            <td id="z0" value="0.00125256"/>
+            <td id="w0" value="0.956"/>
+            <td id="z1" value="0.00000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.00000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="0.04057124"/>
+            <td id="y" value="0.20766227"/>
+            <td id="z0" value="0.00125243"/>
+            <td id="w0" value="0.959"/>
+            <td id="z1" value="0.00000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.00000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="0.04057124"/>
+            <td id="y" value="0.35383114"/>
+            <td id="z0" value="0.00125211"/>
+            <td id="w0" value="0.958"/>
+            <td id="z1" value="0.00000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.00000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="0.04057124"/>
+            <td id="y" value="0.50000000"/>
+            <td id="z0" value="0.00125161"/>
+            <td id="w0" value="0.958"/>
+            <td id="z1" value="0.00000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.00000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="0.04057124"/>
+            <td id="y" value="0.64592484"/>
+            <td id="z0" value="0.00125171"/>
+            <td id="w0" value="0.958"/>
+            <td id="z1" value="0.00000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.00000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="0.04057124"/>
+            <td id="y" value="0.79209370"/>
+            <td id="z0" value="0.00125173"/>
+            <td id="w0" value="0.958"/>
+            <td id="z1" value="0.00000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.00000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="0.04057124"/>
+            <td id="y" value="0.93850659"/>
+            <td id="z0" value="0.00125107"/>
+            <td id="w0" value="0.957"/>
+            <td id="z1" value="0.00000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.00000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="0.13242454"/>
+            <td id="y" value="0.06124939"/>
+            <td id="z0" value="0.00125222"/>
+            <td id="w0" value="0.959"/>
+            <td id="z1" value="0.00000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.00000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="0.13242454"/>
+            <td id="y" value="0.20766227"/>
+            <td id="z0" value="0.00125093"/>
+            <td id="w0" value="0.958"/>
+            <td id="z1" value="0.00000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.00000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="0.13242454"/>
+            <td id="y" value="0.35383114"/>
+            <td id="z0" value="0.00125017"/>
+            <td id="w0" value="0.958"/>
+            <td id="z1" value="0.00000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.00000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="0.13242454"/>
+            <td id="y" value="0.50000000"/>
+            <td id="z0" value="0.00125164"/>
+            <td id="w0" value="0.960"/>
+            <td id="z1" value="0.00000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.00000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="0.13242454"/>
+            <td id="y" value="0.64592484"/>
+            <td id="z0" value="0.00125243"/>
+            <td id="w0" value="0.960"/>
+            <td id="z1" value="0.00000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.00000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="0.13242454"/>
+            <td id="y" value="0.79209370"/>
+            <td id="z0" value="0.00125193"/>
+            <td id="w0" value="0.958"/>
+            <td id="z1" value="0.00000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.00000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="0.13242454"/>
+            <td id="y" value="0.93850659"/>
+            <td id="z0" value="0.00125322"/>
+            <td id="w0" value="0.959"/>
+            <td id="z1" value="0.00000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.00000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="0.22427783"/>
+            <td id="y" value="0.06124939"/>
+            <td id="z0" value="0.00125024"/>
+            <td id="w0" value="0.958"/>
+            <td id="z1" value="0.00000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.00000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="0.22427783"/>
+            <td id="y" value="0.20766227"/>
+            <td id="z0" value="0.00125079"/>
+            <td id="w0" value="0.958"/>
+            <td id="z1" value="0.00000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.00000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="0.22427783"/>
+            <td id="y" value="0.35383114"/>
+            <td id="z0" value="0.00125285"/>
+            <td id="w0" value="0.961"/>
+            <td id="z1" value="0.00000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.00000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="0.22427783"/>
+            <td id="y" value="0.50000000"/>
+            <td id="z0" value="0.00125243"/>
+            <td id="w0" value="0.961"/>
+            <td id="z1" value="0.00000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.00000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="0.22427783"/>
+            <td id="y" value="0.64592484"/>
+            <td id="z0" value="0.00125121"/>
+            <td id="w0" value="0.959"/>
+            <td id="z1" value="0.00000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.00000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="0.22427783"/>
+            <td id="y" value="0.79209370"/>
+            <td id="z0" value="0.00125212"/>
+            <td id="w0" value="0.959"/>
+            <td id="z1" value="0.00000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.00000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="0.22427783"/>
+            <td id="y" value="0.93850659"/>
+            <td id="z0" value="0.00125233"/>
+            <td id="w0" value="0.959"/>
+            <td id="z1" value="0.00000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.00000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="0.31629341"/>
+            <td id="y" value="0.06124939"/>
+            <td id="z0" value="0.00124943"/>
+            <td id="w0" value="0.958"/>
+            <td id="z1" value="0.00000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.00000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="0.31629341"/>
+            <td id="y" value="0.20766227"/>
+            <td id="z0" value="0.00124916"/>
+            <td id="w0" value="0.958"/>
+            <td id="z1" value="0.00000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.00000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="0.31629341"/>
+            <td id="y" value="0.35383114"/>
+            <td id="z0" value="0.00125004"/>
+            <td id="w0" value="0.959"/>
+            <td id="z1" value="0.00000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.00000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="0.31629341"/>
+            <td id="y" value="0.50000000"/>
+            <td id="z0" value="0.00125363"/>
+            <td id="w0" value="0.960"/>
+            <td id="z1" value="0.00000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.00000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="0.31629341"/>
+            <td id="y" value="0.64592484"/>
+            <td id="z0" value="0.00125243"/>
+            <td id="w0" value="0.958"/>
+            <td id="z1" value="0.00000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.00000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="0.31629341"/>
+            <td id="y" value="0.79209370"/>
+            <td id="z0" value="0.00124955"/>
+            <td id="w0" value="0.958"/>
+            <td id="z1" value="0.00000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.00000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="0.31629341"/>
+            <td id="y" value="0.93850659"/>
+            <td id="z0" value="0.00125198"/>
+            <td id="w0" value="0.959"/>
+            <td id="z1" value="0.00000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.00000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="0.40814671"/>
+            <td id="y" value="0.06124939"/>
+            <td id="z0" value="0.00124996"/>
+            <td id="w0" value="0.957"/>
+            <td id="z1" value="0.00000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.00000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="0.40814671"/>
+            <td id="y" value="0.20766227"/>
+            <td id="z0" value="0.00125178"/>
+            <td id="w0" value="0.959"/>
+            <td id="z1" value="0.00000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.00000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="0.40814671"/>
+            <td id="y" value="0.35383114"/>
+            <td id="z0" value="0.00125570"/>
+            <td id="w0" value="0.962"/>
+            <td id="z1" value="0.00000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.00000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="0.40814671"/>
+            <td id="y" value="0.50000000"/>
+            <td id="z0" value="0.00128729"/>
+            <td id="w0" value="0.589"/>
+            <td id="z1" value="0.00000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.00000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="0.40814671"/>
+            <td id="y" value="0.64592484"/>
+            <td id="z0" value="0.00125257"/>
+            <td id="w0" value="0.961"/>
+            <td id="z1" value="0.00000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.00000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="0.40814671"/>
+            <td id="y" value="0.79209370"/>
+            <td id="z0" value="0.00125275"/>
+            <td id="w0" value="0.960"/>
+            <td id="z1" value="0.00000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.00000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="0.40814671"/>
+            <td id="y" value="0.93850659"/>
+            <td id="z0" value="0.00125236"/>
+            <td id="w0" value="0.960"/>
+            <td id="z1" value="0.00000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.00000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="0.50000000"/>
+            <td id="y" value="0.06124939"/>
+            <td id="z0" value="0.00124935"/>
+            <td id="w0" value="0.957"/>
+            <td id="z1" value="0.00000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.00000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="0.50000000"/>
+            <td id="y" value="0.20766227"/>
+            <td id="z0" value="0.00124795"/>
+            <td id="w0" value="0.957"/>
+            <td id="z1" value="0.00000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.00000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="0.50000000"/>
+            <td id="y" value="0.64592484"/>
+            <td id="z0" value="0.00126690"/>
+            <td id="w0" value="0.963"/>
+            <td id="z1" value="0.00000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.00000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="0.50000000"/>
+            <td id="y" value="0.79209370"/>
+            <td id="z0" value="0.00124839"/>
+            <td id="w0" value="0.958"/>
+            <td id="z1" value="0.00000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.00000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="0.50000000"/>
+            <td id="y" value="0.93850659"/>
+            <td id="z0" value="0.00125189"/>
+            <td id="w0" value="0.960"/>
+            <td id="z1" value="0.00000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.00000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="0.59169101"/>
+            <td id="y" value="0.06124939"/>
+            <td id="z0" value="0.00125128"/>
+            <td id="w0" value="0.959"/>
+            <td id="z1" value="0.00000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.00000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="0.59169101"/>
+            <td id="y" value="0.20766227"/>
+            <td id="z0" value="0.00125135"/>
+            <td id="w0" value="0.959"/>
+            <td id="z1" value="0.00000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.00000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="0.59169101"/>
+            <td id="y" value="0.35383114"/>
+            <td id="z0" value="0.00124889"/>
+            <td id="w0" value="0.959"/>
+            <td id="z1" value="0.00000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.00000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="0.59169101"/>
+            <td id="y" value="0.64592484"/>
+            <td id="z0" value="0.00126032"/>
+            <td id="w0" value="0.962"/>
+            <td id="z1" value="0.00000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.00000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="0.59169101"/>
+            <td id="y" value="0.79209370"/>
+            <td id="z0" value="0.00125009"/>
+            <td id="w0" value="0.958"/>
+            <td id="z1" value="0.00000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.00000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="0.59169101"/>
+            <td id="y" value="0.93850659"/>
+            <td id="z0" value="0.00125120"/>
+            <td id="w0" value="0.959"/>
+            <td id="z1" value="0.00000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.00000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="0.68354430"/>
+            <td id="y" value="0.06124939"/>
+            <td id="z0" value="0.00125145"/>
+            <td id="w0" value="0.959"/>
+            <td id="z1" value="0.00000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.00000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="0.68354430"/>
+            <td id="y" value="0.20766227"/>
+            <td id="z0" value="0.00125340"/>
+            <td id="w0" value="0.961"/>
+            <td id="z1" value="0.00000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.00000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="0.68354430"/>
+            <td id="y" value="0.35383114"/>
+            <td id="z0" value="0.00125019"/>
+            <td id="w0" value="0.959"/>
+            <td id="z1" value="0.00000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.00000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="0.68354430"/>
+            <td id="y" value="0.50000000"/>
+            <td id="z0" value="0.00125600"/>
+            <td id="w0" value="0.961"/>
+            <td id="z1" value="0.00000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.00000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="0.68354430"/>
+            <td id="y" value="0.64592484"/>
+            <td id="z0" value="0.00125345"/>
+            <td id="w0" value="0.960"/>
+            <td id="z1" value="0.00000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.00000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="0.68354430"/>
+            <td id="y" value="0.79209370"/>
+            <td id="z0" value="0.00125172"/>
+            <td id="w0" value="0.960"/>
+            <td id="z1" value="0.00000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.00000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="0.68354430"/>
+            <td id="y" value="0.93850659"/>
+            <td id="z0" value="0.00125310"/>
+            <td id="w0" value="0.960"/>
+            <td id="z1" value="0.00000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.00000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="0.77555988"/>
+            <td id="y" value="0.06124939"/>
+            <td id="z0" value="0.00125032"/>
+            <td id="w0" value="0.959"/>
+            <td id="z1" value="0.00000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.00000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="0.77555988"/>
+            <td id="y" value="0.20766227"/>
+            <td id="z0" value="0.00124986"/>
+            <td id="w0" value="0.958"/>
+            <td id="z1" value="0.00000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.00000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="0.77555988"/>
+            <td id="y" value="0.35383114"/>
+            <td id="z0" value="0.00125083"/>
+            <td id="w0" value="0.958"/>
+            <td id="z1" value="0.00000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.00000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="0.77555988"/>
+            <td id="y" value="0.50000000"/>
+            <td id="z0" value="0.00124795"/>
+            <td id="w0" value="0.957"/>
+            <td id="z1" value="0.00000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.00000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="0.77555988"/>
+            <td id="y" value="0.64592484"/>
+            <td id="z0" value="0.00124960"/>
+            <td id="w0" value="0.958"/>
+            <td id="z1" value="0.00000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.00000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="0.77555988"/>
+            <td id="y" value="0.79209370"/>
+            <td id="z0" value="0.00125044"/>
+            <td id="w0" value="0.958"/>
+            <td id="z1" value="0.00000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.00000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="0.77555988"/>
+            <td id="y" value="0.93850659"/>
+            <td id="z0" value="0.00124904"/>
+            <td id="w0" value="0.957"/>
+            <td id="z1" value="0.00000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.00000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="0.86741318"/>
+            <td id="y" value="0.06124939"/>
+            <td id="z0" value="0.00125190"/>
+            <td id="w0" value="0.959"/>
+            <td id="z1" value="0.00000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.00000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="0.86741318"/>
+            <td id="y" value="0.20766227"/>
+            <td id="z0" value="0.00125189"/>
+            <td id="w0" value="0.959"/>
+            <td id="z1" value="0.00000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.00000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="0.86741318"/>
+            <td id="y" value="0.35383114"/>
+            <td id="z0" value="0.00125004"/>
+            <td id="w0" value="0.958"/>
+            <td id="z1" value="0.00000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.00000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="0.86741318"/>
+            <td id="y" value="0.50000000"/>
+            <td id="z0" value="0.00125116"/>
+            <td id="w0" value="0.959"/>
+            <td id="z1" value="0.00000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.00000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="0.86741318"/>
+            <td id="y" value="0.64592484"/>
+            <td id="z0" value="0.00125226"/>
+            <td id="w0" value="0.960"/>
+            <td id="z1" value="0.00000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.00000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="0.86741318"/>
+            <td id="y" value="0.79209370"/>
+            <td id="z0" value="0.00125268"/>
+            <td id="w0" value="0.960"/>
+            <td id="z1" value="0.00000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.00000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="0.86741318"/>
+            <td id="y" value="0.93850659"/>
+            <td id="z0" value="0.00125191"/>
+            <td id="w0" value="0.959"/>
+            <td id="z1" value="0.00000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.00000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="0.95926647"/>
+            <td id="y" value="0.06124939"/>
+            <td id="z0" value="0.00124892"/>
+            <td id="w0" value="0.956"/>
+            <td id="z1" value="0.00000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.00000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="0.95926647"/>
+            <td id="y" value="0.20766227"/>
+            <td id="z0" value="0.00125026"/>
+            <td id="w0" value="0.958"/>
+            <td id="z1" value="0.00000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.00000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="0.95926647"/>
+            <td id="y" value="0.35383114"/>
+            <td id="z0" value="0.00124953"/>
+            <td id="w0" value="0.957"/>
+            <td id="z1" value="0.00000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.00000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="0.95926647"/>
+            <td id="y" value="0.50000000"/>
+            <td id="z0" value="0.00125088"/>
+            <td id="w0" value="0.959"/>
+            <td id="z1" value="0.00000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.00000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="0.95926647"/>
+            <td id="y" value="0.64592484"/>
+            <td id="z0" value="0.00124877"/>
+            <td id="w0" value="0.958"/>
+            <td id="z1" value="0.00000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.00000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="0.95926647"/>
+            <td id="y" value="0.79209370"/>
+            <td id="z0" value="0.00125013"/>
+            <td id="w0" value="0.958"/>
+            <td id="z1" value="0.00000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.00000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="0.95926647"/>
+            <td id="y" value="0.93850659"/>
+            <td id="z0" value="0.00125143"/>
+            <td id="w0" value="0.958"/>
+            <td id="z1" value="0.00000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.00000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+      </table>
+      <parameter id="numberOfChannels" value="1"/>
+      <parameter id="derivativeOrder" value="2"/>
+      <parameter id="smoothing" value="0.250"/>
+      <parameter id="ignoreWeights" value="false"/>
+      <parameter id="modelId"></parameter>
+      <parameter id="modelWidth" value="0"/>
+      <parameter id="modelHeight" value="0"/>
+      <parameter id="downsample" value="2"/>
+      <parameter id="modelSampleFormat" value="f32"/>
+      <parameter id="targetCorrection" value="Divide"/>
+      <parameter id="normalize" value="true"/>
+      <parameter id="discardModel" value="true"/>
+      <parameter id="replaceTarget" value="true"/>
+      <parameter id="correctedImageId"></parameter>
+      <parameter id="correctedImageSampleFormat" value="SameAsTarget"/>
+      <table id="samples" rows="74">
+         <tr>
+            <td id="x" value="250"/>
+            <td id="y" value="251"/>
+            <td id="radius" value="127"/>
+            <td id="symmetries" value="0"/>
+            <td id="axialCount" value="6"/>
+            <td id="isFixed" value="0"/>
+            <td id="z0" value="0.001253"/>
+            <td id="w0" value="0.956"/>
+            <td id="z1" value="0.000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="250"/>
+            <td id="y" value="851"/>
+            <td id="radius" value="127"/>
+            <td id="symmetries" value="0"/>
+            <td id="axialCount" value="6"/>
+            <td id="isFixed" value="0"/>
+            <td id="z0" value="0.001252"/>
+            <td id="w0" value="0.959"/>
+            <td id="z1" value="0.000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="250"/>
+            <td id="y" value="1450"/>
+            <td id="radius" value="127"/>
+            <td id="symmetries" value="0"/>
+            <td id="axialCount" value="6"/>
+            <td id="isFixed" value="0"/>
+            <td id="z0" value="0.001252"/>
+            <td id="w0" value="0.958"/>
+            <td id="z1" value="0.000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="250"/>
+            <td id="y" value="2049"/>
+            <td id="radius" value="127"/>
+            <td id="symmetries" value="0"/>
+            <td id="axialCount" value="6"/>
+            <td id="isFixed" value="0"/>
+            <td id="z0" value="0.001252"/>
+            <td id="w0" value="0.958"/>
+            <td id="z1" value="0.000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="250"/>
+            <td id="y" value="2647"/>
+            <td id="radius" value="127"/>
+            <td id="symmetries" value="0"/>
+            <td id="axialCount" value="6"/>
+            <td id="isFixed" value="0"/>
+            <td id="z0" value="0.001252"/>
+            <td id="w0" value="0.958"/>
+            <td id="z1" value="0.000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="250"/>
+            <td id="y" value="3246"/>
+            <td id="radius" value="127"/>
+            <td id="symmetries" value="0"/>
+            <td id="axialCount" value="6"/>
+            <td id="isFixed" value="0"/>
+            <td id="z0" value="0.001252"/>
+            <td id="w0" value="0.958"/>
+            <td id="z1" value="0.000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="250"/>
+            <td id="y" value="3846"/>
+            <td id="radius" value="127"/>
+            <td id="symmetries" value="0"/>
+            <td id="axialCount" value="6"/>
+            <td id="isFixed" value="0"/>
+            <td id="z0" value="0.001251"/>
+            <td id="w0" value="0.957"/>
+            <td id="z1" value="0.000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="816"/>
+            <td id="y" value="251"/>
+            <td id="radius" value="127"/>
+            <td id="symmetries" value="0"/>
+            <td id="axialCount" value="6"/>
+            <td id="isFixed" value="0"/>
+            <td id="z0" value="0.001252"/>
+            <td id="w0" value="0.959"/>
+            <td id="z1" value="0.000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="816"/>
+            <td id="y" value="851"/>
+            <td id="radius" value="127"/>
+            <td id="symmetries" value="0"/>
+            <td id="axialCount" value="6"/>
+            <td id="isFixed" value="0"/>
+            <td id="z0" value="0.001251"/>
+            <td id="w0" value="0.958"/>
+            <td id="z1" value="0.000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="816"/>
+            <td id="y" value="1450"/>
+            <td id="radius" value="127"/>
+            <td id="symmetries" value="0"/>
+            <td id="axialCount" value="6"/>
+            <td id="isFixed" value="0"/>
+            <td id="z0" value="0.001250"/>
+            <td id="w0" value="0.958"/>
+            <td id="z1" value="0.000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="816"/>
+            <td id="y" value="2049"/>
+            <td id="radius" value="127"/>
+            <td id="symmetries" value="0"/>
+            <td id="axialCount" value="6"/>
+            <td id="isFixed" value="0"/>
+            <td id="z0" value="0.001252"/>
+            <td id="w0" value="0.960"/>
+            <td id="z1" value="0.000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="816"/>
+            <td id="y" value="2647"/>
+            <td id="radius" value="127"/>
+            <td id="symmetries" value="0"/>
+            <td id="axialCount" value="6"/>
+            <td id="isFixed" value="0"/>
+            <td id="z0" value="0.001252"/>
+            <td id="w0" value="0.960"/>
+            <td id="z1" value="0.000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="816"/>
+            <td id="y" value="3246"/>
+            <td id="radius" value="127"/>
+            <td id="symmetries" value="0"/>
+            <td id="axialCount" value="6"/>
+            <td id="isFixed" value="0"/>
+            <td id="z0" value="0.001252"/>
+            <td id="w0" value="0.958"/>
+            <td id="z1" value="0.000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="816"/>
+            <td id="y" value="3846"/>
+            <td id="radius" value="127"/>
+            <td id="symmetries" value="0"/>
+            <td id="axialCount" value="6"/>
+            <td id="isFixed" value="0"/>
+            <td id="z0" value="0.001253"/>
+            <td id="w0" value="0.959"/>
+            <td id="z1" value="0.000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="1382"/>
+            <td id="y" value="251"/>
+            <td id="radius" value="127"/>
+            <td id="symmetries" value="0"/>
+            <td id="axialCount" value="6"/>
+            <td id="isFixed" value="0"/>
+            <td id="z0" value="0.001250"/>
+            <td id="w0" value="0.958"/>
+            <td id="z1" value="0.000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="1382"/>
+            <td id="y" value="851"/>
+            <td id="radius" value="127"/>
+            <td id="symmetries" value="0"/>
+            <td id="axialCount" value="6"/>
+            <td id="isFixed" value="0"/>
+            <td id="z0" value="0.001251"/>
+            <td id="w0" value="0.958"/>
+            <td id="z1" value="0.000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="1382"/>
+            <td id="y" value="1450"/>
+            <td id="radius" value="127"/>
+            <td id="symmetries" value="0"/>
+            <td id="axialCount" value="6"/>
+            <td id="isFixed" value="0"/>
+            <td id="z0" value="0.001253"/>
+            <td id="w0" value="0.961"/>
+            <td id="z1" value="0.000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="1382"/>
+            <td id="y" value="2049"/>
+            <td id="radius" value="127"/>
+            <td id="symmetries" value="0"/>
+            <td id="axialCount" value="6"/>
+            <td id="isFixed" value="0"/>
+            <td id="z0" value="0.001252"/>
+            <td id="w0" value="0.961"/>
+            <td id="z1" value="0.000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="1382"/>
+            <td id="y" value="2647"/>
+            <td id="radius" value="127"/>
+            <td id="symmetries" value="0"/>
+            <td id="axialCount" value="6"/>
+            <td id="isFixed" value="0"/>
+            <td id="z0" value="0.001251"/>
+            <td id="w0" value="0.959"/>
+            <td id="z1" value="0.000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="1382"/>
+            <td id="y" value="3246"/>
+            <td id="radius" value="127"/>
+            <td id="symmetries" value="0"/>
+            <td id="axialCount" value="6"/>
+            <td id="isFixed" value="0"/>
+            <td id="z0" value="0.001252"/>
+            <td id="w0" value="0.959"/>
+            <td id="z1" value="0.000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="1382"/>
+            <td id="y" value="3846"/>
+            <td id="radius" value="127"/>
+            <td id="symmetries" value="0"/>
+            <td id="axialCount" value="6"/>
+            <td id="isFixed" value="0"/>
+            <td id="z0" value="0.001252"/>
+            <td id="w0" value="0.959"/>
+            <td id="z1" value="0.000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="1949"/>
+            <td id="y" value="251"/>
+            <td id="radius" value="127"/>
+            <td id="symmetries" value="0"/>
+            <td id="axialCount" value="6"/>
+            <td id="isFixed" value="0"/>
+            <td id="z0" value="0.001249"/>
+            <td id="w0" value="0.958"/>
+            <td id="z1" value="0.000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="1949"/>
+            <td id="y" value="851"/>
+            <td id="radius" value="127"/>
+            <td id="symmetries" value="0"/>
+            <td id="axialCount" value="6"/>
+            <td id="isFixed" value="0"/>
+            <td id="z0" value="0.001249"/>
+            <td id="w0" value="0.958"/>
+            <td id="z1" value="0.000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="1949"/>
+            <td id="y" value="1450"/>
+            <td id="radius" value="127"/>
+            <td id="symmetries" value="0"/>
+            <td id="axialCount" value="6"/>
+            <td id="isFixed" value="0"/>
+            <td id="z0" value="0.001250"/>
+            <td id="w0" value="0.959"/>
+            <td id="z1" value="0.000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="1949"/>
+            <td id="y" value="2049"/>
+            <td id="radius" value="127"/>
+            <td id="symmetries" value="0"/>
+            <td id="axialCount" value="6"/>
+            <td id="isFixed" value="0"/>
+            <td id="z0" value="0.001254"/>
+            <td id="w0" value="0.960"/>
+            <td id="z1" value="0.000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="1949"/>
+            <td id="y" value="2647"/>
+            <td id="radius" value="127"/>
+            <td id="symmetries" value="0"/>
+            <td id="axialCount" value="6"/>
+            <td id="isFixed" value="0"/>
+            <td id="z0" value="0.001252"/>
+            <td id="w0" value="0.958"/>
+            <td id="z1" value="0.000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="1949"/>
+            <td id="y" value="3246"/>
+            <td id="radius" value="127"/>
+            <td id="symmetries" value="0"/>
+            <td id="axialCount" value="6"/>
+            <td id="isFixed" value="0"/>
+            <td id="z0" value="0.001250"/>
+            <td id="w0" value="0.958"/>
+            <td id="z1" value="0.000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="1949"/>
+            <td id="y" value="3846"/>
+            <td id="radius" value="127"/>
+            <td id="symmetries" value="0"/>
+            <td id="axialCount" value="6"/>
+            <td id="isFixed" value="0"/>
+            <td id="z0" value="0.001252"/>
+            <td id="w0" value="0.959"/>
+            <td id="z1" value="0.000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="2515"/>
+            <td id="y" value="251"/>
+            <td id="radius" value="127"/>
+            <td id="symmetries" value="0"/>
+            <td id="axialCount" value="6"/>
+            <td id="isFixed" value="0"/>
+            <td id="z0" value="0.001250"/>
+            <td id="w0" value="0.957"/>
+            <td id="z1" value="0.000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="2515"/>
+            <td id="y" value="851"/>
+            <td id="radius" value="127"/>
+            <td id="symmetries" value="0"/>
+            <td id="axialCount" value="6"/>
+            <td id="isFixed" value="0"/>
+            <td id="z0" value="0.001252"/>
+            <td id="w0" value="0.959"/>
+            <td id="z1" value="0.000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="2515"/>
+            <td id="y" value="1450"/>
+            <td id="radius" value="127"/>
+            <td id="symmetries" value="0"/>
+            <td id="axialCount" value="6"/>
+            <td id="isFixed" value="0"/>
+            <td id="z0" value="0.001256"/>
+            <td id="w0" value="0.962"/>
+            <td id="z1" value="0.000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="2515"/>
+            <td id="y" value="2049"/>
+            <td id="radius" value="127"/>
+            <td id="symmetries" value="0"/>
+            <td id="axialCount" value="6"/>
+            <td id="isFixed" value="0"/>
+            <td id="z0" value="0.001287"/>
+            <td id="w0" value="0.589"/>
+            <td id="z1" value="0.000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="2515"/>
+            <td id="y" value="2647"/>
+            <td id="radius" value="127"/>
+            <td id="symmetries" value="0"/>
+            <td id="axialCount" value="6"/>
+            <td id="isFixed" value="0"/>
+            <td id="z0" value="0.001253"/>
+            <td id="w0" value="0.961"/>
+            <td id="z1" value="0.000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="2515"/>
+            <td id="y" value="3246"/>
+            <td id="radius" value="127"/>
+            <td id="symmetries" value="0"/>
+            <td id="axialCount" value="6"/>
+            <td id="isFixed" value="0"/>
+            <td id="z0" value="0.001253"/>
+            <td id="w0" value="0.960"/>
+            <td id="z1" value="0.000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="2515"/>
+            <td id="y" value="3846"/>
+            <td id="radius" value="127"/>
+            <td id="symmetries" value="0"/>
+            <td id="axialCount" value="6"/>
+            <td id="isFixed" value="0"/>
+            <td id="z0" value="0.001252"/>
+            <td id="w0" value="0.960"/>
+            <td id="z1" value="0.000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="3081"/>
+            <td id="y" value="251"/>
+            <td id="radius" value="127"/>
+            <td id="symmetries" value="0"/>
+            <td id="axialCount" value="6"/>
+            <td id="isFixed" value="0"/>
+            <td id="z0" value="0.001249"/>
+            <td id="w0" value="0.957"/>
+            <td id="z1" value="0.000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="3081"/>
+            <td id="y" value="851"/>
+            <td id="radius" value="127"/>
+            <td id="symmetries" value="0"/>
+            <td id="axialCount" value="6"/>
+            <td id="isFixed" value="0"/>
+            <td id="z0" value="0.001248"/>
+            <td id="w0" value="0.957"/>
+            <td id="z1" value="0.000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="3081"/>
+            <td id="y" value="2647"/>
+            <td id="radius" value="127"/>
+            <td id="symmetries" value="0"/>
+            <td id="axialCount" value="6"/>
+            <td id="isFixed" value="0"/>
+            <td id="z0" value="0.001267"/>
+            <td id="w0" value="0.963"/>
+            <td id="z1" value="0.000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="3081"/>
+            <td id="y" value="3246"/>
+            <td id="radius" value="127"/>
+            <td id="symmetries" value="0"/>
+            <td id="axialCount" value="6"/>
+            <td id="isFixed" value="0"/>
+            <td id="z0" value="0.001248"/>
+            <td id="w0" value="0.958"/>
+            <td id="z1" value="0.000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="3081"/>
+            <td id="y" value="3846"/>
+            <td id="radius" value="127"/>
+            <td id="symmetries" value="0"/>
+            <td id="axialCount" value="6"/>
+            <td id="isFixed" value="0"/>
+            <td id="z0" value="0.001252"/>
+            <td id="w0" value="0.960"/>
+            <td id="z1" value="0.000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="3646"/>
+            <td id="y" value="251"/>
+            <td id="radius" value="127"/>
+            <td id="symmetries" value="0"/>
+            <td id="axialCount" value="6"/>
+            <td id="isFixed" value="0"/>
+            <td id="z0" value="0.001251"/>
+            <td id="w0" value="0.959"/>
+            <td id="z1" value="0.000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="3646"/>
+            <td id="y" value="851"/>
+            <td id="radius" value="127"/>
+            <td id="symmetries" value="0"/>
+            <td id="axialCount" value="6"/>
+            <td id="isFixed" value="0"/>
+            <td id="z0" value="0.001251"/>
+            <td id="w0" value="0.959"/>
+            <td id="z1" value="0.000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="3646"/>
+            <td id="y" value="1450"/>
+            <td id="radius" value="127"/>
+            <td id="symmetries" value="0"/>
+            <td id="axialCount" value="6"/>
+            <td id="isFixed" value="0"/>
+            <td id="z0" value="0.001249"/>
+            <td id="w0" value="0.959"/>
+            <td id="z1" value="0.000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="3646"/>
+            <td id="y" value="2647"/>
+            <td id="radius" value="127"/>
+            <td id="symmetries" value="0"/>
+            <td id="axialCount" value="6"/>
+            <td id="isFixed" value="0"/>
+            <td id="z0" value="0.001260"/>
+            <td id="w0" value="0.962"/>
+            <td id="z1" value="0.000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="3646"/>
+            <td id="y" value="3246"/>
+            <td id="radius" value="127"/>
+            <td id="symmetries" value="0"/>
+            <td id="axialCount" value="6"/>
+            <td id="isFixed" value="0"/>
+            <td id="z0" value="0.001250"/>
+            <td id="w0" value="0.958"/>
+            <td id="z1" value="0.000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="3646"/>
+            <td id="y" value="3846"/>
+            <td id="radius" value="127"/>
+            <td id="symmetries" value="0"/>
+            <td id="axialCount" value="6"/>
+            <td id="isFixed" value="0"/>
+            <td id="z0" value="0.001251"/>
+            <td id="w0" value="0.959"/>
+            <td id="z1" value="0.000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="4212"/>
+            <td id="y" value="251"/>
+            <td id="radius" value="127"/>
+            <td id="symmetries" value="0"/>
+            <td id="axialCount" value="6"/>
+            <td id="isFixed" value="0"/>
+            <td id="z0" value="0.001251"/>
+            <td id="w0" value="0.959"/>
+            <td id="z1" value="0.000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="4212"/>
+            <td id="y" value="851"/>
+            <td id="radius" value="127"/>
+            <td id="symmetries" value="0"/>
+            <td id="axialCount" value="6"/>
+            <td id="isFixed" value="0"/>
+            <td id="z0" value="0.001253"/>
+            <td id="w0" value="0.961"/>
+            <td id="z1" value="0.000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="4212"/>
+            <td id="y" value="1450"/>
+            <td id="radius" value="127"/>
+            <td id="symmetries" value="0"/>
+            <td id="axialCount" value="6"/>
+            <td id="isFixed" value="0"/>
+            <td id="z0" value="0.001250"/>
+            <td id="w0" value="0.959"/>
+            <td id="z1" value="0.000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="4212"/>
+            <td id="y" value="2049"/>
+            <td id="radius" value="127"/>
+            <td id="symmetries" value="0"/>
+            <td id="axialCount" value="6"/>
+            <td id="isFixed" value="0"/>
+            <td id="z0" value="0.001256"/>
+            <td id="w0" value="0.961"/>
+            <td id="z1" value="0.000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="4212"/>
+            <td id="y" value="2647"/>
+            <td id="radius" value="127"/>
+            <td id="symmetries" value="0"/>
+            <td id="axialCount" value="6"/>
+            <td id="isFixed" value="0"/>
+            <td id="z0" value="0.001253"/>
+            <td id="w0" value="0.960"/>
+            <td id="z1" value="0.000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="4212"/>
+            <td id="y" value="3246"/>
+            <td id="radius" value="127"/>
+            <td id="symmetries" value="0"/>
+            <td id="axialCount" value="6"/>
+            <td id="isFixed" value="0"/>
+            <td id="z0" value="0.001252"/>
+            <td id="w0" value="0.960"/>
+            <td id="z1" value="0.000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="4212"/>
+            <td id="y" value="3846"/>
+            <td id="radius" value="127"/>
+            <td id="symmetries" value="0"/>
+            <td id="axialCount" value="6"/>
+            <td id="isFixed" value="0"/>
+            <td id="z0" value="0.001253"/>
+            <td id="w0" value="0.960"/>
+            <td id="z1" value="0.000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="4779"/>
+            <td id="y" value="251"/>
+            <td id="radius" value="127"/>
+            <td id="symmetries" value="0"/>
+            <td id="axialCount" value="6"/>
+            <td id="isFixed" value="0"/>
+            <td id="z0" value="0.001250"/>
+            <td id="w0" value="0.959"/>
+            <td id="z1" value="0.000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="4779"/>
+            <td id="y" value="851"/>
+            <td id="radius" value="127"/>
+            <td id="symmetries" value="0"/>
+            <td id="axialCount" value="6"/>
+            <td id="isFixed" value="0"/>
+            <td id="z0" value="0.001250"/>
+            <td id="w0" value="0.958"/>
+            <td id="z1" value="0.000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="4779"/>
+            <td id="y" value="1450"/>
+            <td id="radius" value="127"/>
+            <td id="symmetries" value="0"/>
+            <td id="axialCount" value="6"/>
+            <td id="isFixed" value="0"/>
+            <td id="z0" value="0.001251"/>
+            <td id="w0" value="0.958"/>
+            <td id="z1" value="0.000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="4779"/>
+            <td id="y" value="2049"/>
+            <td id="radius" value="127"/>
+            <td id="symmetries" value="0"/>
+            <td id="axialCount" value="6"/>
+            <td id="isFixed" value="0"/>
+            <td id="z0" value="0.001248"/>
+            <td id="w0" value="0.957"/>
+            <td id="z1" value="0.000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="4779"/>
+            <td id="y" value="2647"/>
+            <td id="radius" value="127"/>
+            <td id="symmetries" value="0"/>
+            <td id="axialCount" value="6"/>
+            <td id="isFixed" value="0"/>
+            <td id="z0" value="0.001250"/>
+            <td id="w0" value="0.958"/>
+            <td id="z1" value="0.000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="4779"/>
+            <td id="y" value="3246"/>
+            <td id="radius" value="127"/>
+            <td id="symmetries" value="0"/>
+            <td id="axialCount" value="6"/>
+            <td id="isFixed" value="0"/>
+            <td id="z0" value="0.001250"/>
+            <td id="w0" value="0.958"/>
+            <td id="z1" value="0.000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="4779"/>
+            <td id="y" value="3846"/>
+            <td id="radius" value="127"/>
+            <td id="symmetries" value="0"/>
+            <td id="axialCount" value="6"/>
+            <td id="isFixed" value="0"/>
+            <td id="z0" value="0.001249"/>
+            <td id="w0" value="0.957"/>
+            <td id="z1" value="0.000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="5345"/>
+            <td id="y" value="251"/>
+            <td id="radius" value="127"/>
+            <td id="symmetries" value="0"/>
+            <td id="axialCount" value="6"/>
+            <td id="isFixed" value="0"/>
+            <td id="z0" value="0.001252"/>
+            <td id="w0" value="0.959"/>
+            <td id="z1" value="0.000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="5345"/>
+            <td id="y" value="851"/>
+            <td id="radius" value="127"/>
+            <td id="symmetries" value="0"/>
+            <td id="axialCount" value="6"/>
+            <td id="isFixed" value="0"/>
+            <td id="z0" value="0.001252"/>
+            <td id="w0" value="0.959"/>
+            <td id="z1" value="0.000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="5345"/>
+            <td id="y" value="1450"/>
+            <td id="radius" value="127"/>
+            <td id="symmetries" value="0"/>
+            <td id="axialCount" value="6"/>
+            <td id="isFixed" value="0"/>
+            <td id="z0" value="0.001250"/>
+            <td id="w0" value="0.958"/>
+            <td id="z1" value="0.000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="5345"/>
+            <td id="y" value="2049"/>
+            <td id="radius" value="127"/>
+            <td id="symmetries" value="0"/>
+            <td id="axialCount" value="6"/>
+            <td id="isFixed" value="0"/>
+            <td id="z0" value="0.001251"/>
+            <td id="w0" value="0.959"/>
+            <td id="z1" value="0.000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="5345"/>
+            <td id="y" value="2647"/>
+            <td id="radius" value="127"/>
+            <td id="symmetries" value="0"/>
+            <td id="axialCount" value="6"/>
+            <td id="isFixed" value="0"/>
+            <td id="z0" value="0.001252"/>
+            <td id="w0" value="0.960"/>
+            <td id="z1" value="0.000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="5345"/>
+            <td id="y" value="3246"/>
+            <td id="radius" value="127"/>
+            <td id="symmetries" value="0"/>
+            <td id="axialCount" value="6"/>
+            <td id="isFixed" value="0"/>
+            <td id="z0" value="0.001253"/>
+            <td id="w0" value="0.960"/>
+            <td id="z1" value="0.000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="5345"/>
+            <td id="y" value="3846"/>
+            <td id="radius" value="127"/>
+            <td id="symmetries" value="0"/>
+            <td id="axialCount" value="6"/>
+            <td id="isFixed" value="0"/>
+            <td id="z0" value="0.001252"/>
+            <td id="w0" value="0.959"/>
+            <td id="z1" value="0.000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="5911"/>
+            <td id="y" value="251"/>
+            <td id="radius" value="127"/>
+            <td id="symmetries" value="0"/>
+            <td id="axialCount" value="6"/>
+            <td id="isFixed" value="0"/>
+            <td id="z0" value="0.001249"/>
+            <td id="w0" value="0.956"/>
+            <td id="z1" value="0.000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="5911"/>
+            <td id="y" value="851"/>
+            <td id="radius" value="127"/>
+            <td id="symmetries" value="0"/>
+            <td id="axialCount" value="6"/>
+            <td id="isFixed" value="0"/>
+            <td id="z0" value="0.001250"/>
+            <td id="w0" value="0.958"/>
+            <td id="z1" value="0.000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="5911"/>
+            <td id="y" value="1450"/>
+            <td id="radius" value="127"/>
+            <td id="symmetries" value="0"/>
+            <td id="axialCount" value="6"/>
+            <td id="isFixed" value="0"/>
+            <td id="z0" value="0.001250"/>
+            <td id="w0" value="0.957"/>
+            <td id="z1" value="0.000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="5911"/>
+            <td id="y" value="2049"/>
+            <td id="radius" value="127"/>
+            <td id="symmetries" value="0"/>
+            <td id="axialCount" value="6"/>
+            <td id="isFixed" value="0"/>
+            <td id="z0" value="0.001251"/>
+            <td id="w0" value="0.959"/>
+            <td id="z1" value="0.000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="5911"/>
+            <td id="y" value="2647"/>
+            <td id="radius" value="127"/>
+            <td id="symmetries" value="0"/>
+            <td id="axialCount" value="6"/>
+            <td id="isFixed" value="0"/>
+            <td id="z0" value="0.001249"/>
+            <td id="w0" value="0.958"/>
+            <td id="z1" value="0.000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="5911"/>
+            <td id="y" value="3246"/>
+            <td id="radius" value="127"/>
+            <td id="symmetries" value="0"/>
+            <td id="axialCount" value="6"/>
+            <td id="isFixed" value="0"/>
+            <td id="z0" value="0.001250"/>
+            <td id="w0" value="0.958"/>
+            <td id="z1" value="0.000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+         <tr>
+            <td id="x" value="5911"/>
+            <td id="y" value="3846"/>
+            <td id="radius" value="127"/>
+            <td id="symmetries" value="0"/>
+            <td id="axialCount" value="6"/>
+            <td id="isFixed" value="0"/>
+            <td id="z0" value="0.001251"/>
+            <td id="w0" value="0.958"/>
+            <td id="z1" value="0.000000"/>
+            <td id="w1" value="0.000"/>
+            <td id="z2" value="0.000000"/>
+            <td id="w2" value="0.000"/>
+         </tr>
+      </table>
+      <parameter id="imageWidth" value="6162"/>
+      <parameter id="imageHeight" value="4098"/>
+      <parameter id="symmetryCenterX" value="0.500000"/>
+      <parameter id="symmetryCenterY" value="0.500000"/>
+      <parameter id="tolerance" value="1.000"/>
+      <parameter id="shadowsRelaxation" value="15.000"/>
+      <parameter id="minSampleFraction" value="0.050"/>
+      <parameter id="defaultSampleRadius" value="250"/>
+      <parameter id="samplesPerRow" value="10"/>
+      <parameter id="minWeight" value="0.750"/>
+      <parameter id="sampleColor" value="4292927712"/>
+      <parameter id="selectedSampleColor" value="4278255360"/>
+      <parameter id="selectedSampleFillColor" value="0"/>
+      <parameter id="badSampleColor" value="4294901760"/>
+      <parameter id="badSampleFillColor" value="2164195328"/>
+      <parameter id="axisColor" value="4292927712"/>
+   </instance>
+   <instance class="PixelMath" version="256" id="Bills_Stretch_Unlinked_V4_instance">
+      <time start="2024-08-04T11:38:21.457Z" span="2.4356809"/>
+      <parameter id="expression">/*      Unlinked Stretch Test with Curve Adjustment         
+                    by Bill Blanshan                     */
+
+
+Stretch=  0.20 ; //&lt;-- Target background value
+Curve=    1.00 ; //&lt;-- 1= MTF style, &gt;1= Reduce Highlights
+
+
+
+//Drag the bottom left arrow over into the image you want stretched 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+E1= min(max(0,med($T)+-2.8*1.4826*mdev($T)),1);
+E2= max(0,($T-E1)/~E1); 
+E3= med($T)-E1;
+E4= min(1,(1/Curve));
+E5= ((Stretch-1)*E3) / ((2*Stretch-1) * E3^E4-Stretch); //MTF value
+E6= ( (E5-1)*E2) / ( (2*E5-1) * E2^E4-E5);
+
+E6</parameter>
+      <parameter id="expression1"></parameter>
+      <parameter id="expression2"></parameter>
+      <parameter id="expression3"></parameter>
+      <parameter id="useSingleExpression" value="true"/>
+      <parameter id="symbols">Stretch,Curve,
+E1,E2,E3,E4,E5,E6,E7,</parameter>
+      <parameter id="clearImageCacheAndExit" value="false"/>
+      <parameter id="cacheGeneratedImages" value="false"/>
+      <parameter id="generateOutput" value="true"/>
+      <parameter id="singleThreaded" value="false"/>
+      <parameter id="optimization" value="true"/>
+      <parameter id="use64BitWorkingImage" value="false"/>
+      <parameter id="rescale" value="false"/>
+      <parameter id="rescaleLower" value="0"/>
+      <parameter id="rescaleUpper" value="1"/>
+      <parameter id="truncate" value="true"/>
+      <parameter id="truncateLower" value="0"/>
+      <parameter id="truncateUpper" value="1"/>
+      <parameter id="createNewImage" value="false"/>
+      <parameter id="showNewImage" value="true"/>
+      <parameter id="newImageId"></parameter>
+      <parameter id="newImageWidth" value="0"/>
+      <parameter id="newImageHeight" value="0"/>
+      <parameter id="newImageAlpha" value="false"/>
+      <parameter id="newImageColorSpace" value="SameAsTarget"/>
+      <parameter id="newImageSampleFormat" value="SameAsTarget"/>
+      <table id="outputData" rows="0"/>
+   </instance>
+   <instance class="ChannelCombination" version="256" id="xHOO_instance">
+      <parameter id="colorSpace" value="RGB"/>
+      <table id="channels" rows="3">
+         <tr>
+            <td id="enabled" value="true"/>
+            <td id="id">x_H</td>
+         </tr>
+         <tr>
+            <td id="enabled" value="true"/>
+            <td id="id">x_O</td>
+         </tr>
+         <tr>
+            <td id="enabled" value="true"/>
+            <td id="id">x_O</td>
+         </tr>
+      </table>
+      <parameter id="inheritAstrometricSolution" value="true"/>
+   </instance>
+   <instance class="BlurXTerminator" version="256" id="BluerX_instance">
+      <time start="2025-07-05T05:43:49.676Z" span="5.7053425"/>
+      <parameter id="ai_file">BlurXTerminator.4.mlpackage</parameter>
+      <parameter id="correct_only" value="false"/>
+      <parameter id="correct_first" value="false"/>
+      <parameter id="nonstellar_then_stellar" value="false"/>
+      <parameter id="lum_only" value="false"/>
+      <parameter id="sharpen_stars" value="0.19"/>
+      <parameter id="adjust_halos" value="0.32"/>
+      <parameter id="nonstellar_psf_diameter" value="0.00"/>
+      <parameter id="auto_nonstellar_psf" value="true"/>
+      <parameter id="sharpen_nonstellar" value="0.50"/>
+   </instance>
+   <instance class="StarXTerminator" version="256" id="SarXX_instance">
+      <parameter id="ai_file">StarXTerminator.11.mlpackage</parameter>
+      <parameter id="stars" value="true"/>
+      <parameter id="unscreen" value="true"/>
+      <parameter id="overlap" value="0.50"/>
+   </instance>
+   <instance class="NoiseXTerminator" version="256" id="Denoise_instance">
+      <parameter id="ai_file">NoiseXTerminator.3.mlpackage</parameter>
+      <parameter id="enable_color_separation" value="false"/>
+      <parameter id="enable_frequency_separation" value="false"/>
+      <parameter id="denoise" value="0.75"/>
+      <parameter id="denoise_color" value="0.90"/>
+      <parameter id="denoise_lf" value="0.9"/>
+      <parameter id="denoise_lf_color" value="0.9"/>
+      <parameter id="frequency_scale" value="5.0"/>
+      <parameter id="iterations" value="2"/>
+      <parameter id="detail" value="0.15"/>
+   </instance>
+   <instance class="StarXTerminator" version="256" id="StarX_instance">
+      <time start="2025-07-05T05:29:27.195Z" span="13.64326"/>
+      <parameter id="ai_file">StarXTerminator.11.mlpackage</parameter>
+      <parameter id="stars" value="false"/>
+      <parameter id="unscreen" value="true"/>
+      <parameter id="overlap" value="0.50"/>
+   </instance>
+   <icon id="ModifiedSCNR_v5" instance="ModifiedSCNR_v5_instance" xpos="376" ypos="160" workspace="Workspace01"/>
+   <icon id="Bills_Stretch_Llinked__V4" instance="Bills_Stretch_Llinked__V4_instance" xpos="376" ypos="96" workspace="Workspace01"/>
+   <icon id="HOONormalizationV5" instance="HOONormalizationV5_instance" xpos="592" ypos="64" workspace="Workspace01"/>
+   <icon id="SHONormalizationV5" instance="SHONormalizationV5_instance" xpos="592" ypos="96" workspace="Workspace01"/>
+   <icon id="HSONormalizationV5" instance="HSONormalizationV5_instance" xpos="592" ypos="128" workspace="Workspace01"/>
+   <icon id="SHONormalizationV3" instance="SHONormalizationV3_instance" xpos="760" ypos="96" workspace="Workspace01"/>
+   <icon id="HOONormalizationV4" instance="HOONormalizationV4_instance" xpos="760" ypos="64" workspace="Workspace01"/>
+   <icon id="myStretch" instance="myStretch_instance" xpos="376" ypos="128" workspace="Workspace01"/>
+   <icon id="MyKometa" instance="MyKometa_instance" xpos="104" ypos="64" workspace="Workspace01"/>
+   <icon id="MaskBlur" instance="MaskBlur_instance" xpos="960" ypos="232" workspace="Workspace01"/>
+   <icon id="GreenMask" instance="GreenMask_instance" xpos="960" ypos="120" workspace="Workspace01"/>
+   <icon id="YellowMask" instance="YellowMask_instance" xpos="960" ypos="96" workspace="Workspace01"/>
+   <icon id="CyanMask" instance="CyanMask_instance" xpos="960" ypos="144" workspace="Workspace01"/>
+   <icon id="BlueMask" instance="BlueMask_instance" xpos="960" ypos="168" workspace="Workspace01"/>
+   <icon id="MagentaMask" instance="MagentaMask_instance" xpos="960" ypos="200" workspace="Workspace01"/>
+   <icon id="RedMask" instance="RedMask_instance" xpos="960" ypos="64" workspace="Workspace01"/>
+   <icon id="CloneForStarless" instance="CloneForStarless_instance" xpos="1120" ypos="64" workspace="Workspace01"/>
+   <icon id="StarReductionMethod1_V3" instance="StarReductionMethod1_V3_instance" xpos="1120" ypos="96" workspace="Workspace01"/>
+   <icon id="StarReductionMethod2_V3" instance="StarReductionMethod2_V3_instance" xpos="1120" ypos="128" workspace="Workspace01"/>
+   <icon id="StarReductionMethod3_V3" instance="StarReductionMethod3_V3_instance" xpos="1120" ypos="160" workspace="Workspace01"/>
+   <icon id="AddLightnessToRGB_V1" instance="AddLightnessToRGB_V1_instance" xpos="1336" ypos="64" workspace="Workspace01"/>
+   <icon id="CloneForStarless_NB" instance="CloneForStarless_NB_instance" xpos="1336" ypos="144" workspace="Workspace01"/>
+   <icon id="CloneForStarless_RGB" instance="CloneForStarless_RGB_instance" xpos="1336" ypos="112" workspace="Workspace01"/>
+   <icon id="RGBstars_to_NB_V14" instance="RGBstars_to_NB_V14_instance" xpos="1336" ypos="176" workspace="Workspace01"/>
+   <icon id="CloneForStarless_Ha_" instance="CloneForStarless_Ha__instance" xpos="1544" ypos="176" workspace="Workspace01"/>
+   <icon id="Ha_to_RGB_Nebula_Simple_V1" instance="Ha_to_RGB_Nebula_Simple_V1_instance" xpos="1536" ypos="64" workspace="Workspace01"/>
+   <icon id="CloneForStarless_RGB_" instance="CloneForStarless_RGB__instance" xpos="1536" ypos="136" workspace="Workspace01"/>
+   <icon id="Ha_to_RGB_Advanced_V1" instance="Ha_to_RGB_Advanced_V1_instance" xpos="1536" ypos="104" workspace="Workspace01"/>
+   <icon id="AddMyStat" instance="AddMyStat_instance" xpos="576" ypos="168" workspace="Workspace01"/>
+   <icon id="iRGB" instance="iRGB_instance" xpos="368" ypos="232" workspace="Workspace01"/>
+   <icon id="zSHO" instance="zSHO_instance" xpos="608" ypos="240" workspace="Workspace01"/>
+   <icon id="GRGB" instance="GRGB_instance" xpos="720" ypos="240" workspace="Workspace01"/>
+   <icon id="StarAligment" instance="StarAligment_instance" xpos="120" ypos="152" workspace="Workspace01"/>
+   <icon id="myDBE" instance="myDBE_instance" xpos="104" ypos="96" workspace="Workspace01"/>
+   <icon id="Bills_Stretch_Unlinked_V4" instance="Bills_Stretch_Unlinked_V4_instance" xpos="376" ypos="64" workspace="Workspace01"/>
+   <icon id="xHOO" instance="xHOO_instance" xpos="496" ypos="240" workspace="Workspace01"/>
+   <icon id="BluerX" instance="BluerX_instance" xpos="208" ypos="96" workspace="Workspace01"/>
+   <icon id="SarXX" instance="SarXX_instance" xpos="288" ypos="64" workspace="Workspace01"/>
+   <icon id="Denoise" instance="Denoise_instance" xpos="288" ypos="112" workspace="Workspace01"/>
+   <icon id="StarX" instance="StarX_instance" xpos="208" ypos="56" workspace="Workspace01"/>
+</xpsm>

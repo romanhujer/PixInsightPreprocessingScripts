@@ -67,3 +67,5 @@ Licencováno pod **GNU GPLv3**.
 
 **[EN] Disclaimer:** This script performs file moves and deletions. The author assumes no responsibility for any data loss or damage caused by using this software. Use at your own risk and always keep your data backed up.
 Licensed under **GNU GPLv3**.            
+
+VERSION="1.0.1"
