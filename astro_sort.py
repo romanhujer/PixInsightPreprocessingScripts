@@ -80,7 +80,8 @@ def process():
     print(f"{Color.BOLD}🚀 Startuji Astro Sorter (ASIAIR Crawler Mode)...{Color.END}")
     
     session_log = {} 
-    source_root = pathlib.Path(".")
+    source_root = pathlib.Path("./ASIAIR/")
+    dest_root = pathlib.Path(".")
     all_files = list(source_root.rglob('*'))
     
     processed_count = 0
@@ -112,7 +113,7 @@ def process():
                 print(f"{Color.BLUE}📦 [Noc {mmdd}]{Color.END} Objekt: {Color.BOLD}{obj}{Color.END} | {cam}")
                 
                 cam_dirname = f"ASI{cam}" if "Dwarf" not in cam else cam
-                dest_dir = source_root / obj / "Light" / mmdd / cam_dirname
+                dest_dir = dest_root / obj / "Light" / mmdd / cam_dirname
                 dest_dir.mkdir(parents=True, exist_ok=True)
                 
                 shutil.move(str(path), str(dest_dir / fname))
@@ -148,7 +149,7 @@ def process():
             print(f"{Color.GREEN}✨ [Flat]{Color.END} Rozesílám pro noc {mmdd} ({cam})")
             for target_obj in session_log[(mmdd, cam)]:
                 cam_dirname = f"ASI{cam}" if "Dwarf" not in cam else cam
-                f_dest = source_root / target_obj / "Light" / mmdd / cam_dirname / "Flat"
+                f_dest = dest_root / target_obj / "Light" / mmdd / cam_dirname / "Flat"
                 f_dest.mkdir(parents=True, exist_ok=True)
                 shutil.copy2(str(path), str(f_dest / path.name))
         
