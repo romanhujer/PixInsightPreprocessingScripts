@@ -80,7 +80,7 @@ def process():
     print(f"{Color.BOLD}🚀 Startuji Astro Sorter (ASIAIR Crawler Mode)...{Color.END}")
     
     session_log = {} 
-    source_root = pathlib.Path("./ASIAIR/")
+    source_root = pathlib.Path("./AA/")
     dest_root = pathlib.Path(".")
     all_files = list(source_root.rglob('*'))
     
