@@ -13,8 +13,11 @@ LIB_ROOT = os.path.abspath("!Master_Standard")
 CAMERA_MAP = {
     "2600MC": "ASI2600MC/G300_-10C",
     "2600MM": "ASI2600MM/G300_-10C",
-    "1600MM": {"cold": "ASI1600MM/G0_-20C", "warm": "ASI1600MM/G139_-15C"},
-    "294MC":  {"cold": "ASI294MC/G120_-20C", "warm": "ASI294MC/G120_0C"},
+    "1600MM": "ASI1600MM/G300_-20C",
+#   "1600MM": "ASI1600MM/G139_-20C",
+#   "1600MM": "ASI1600MM/G0_-20C",    
+    "294MC":  "ASI294MC/G120_0C",
+#    "294MC":  "ASI294MC/G120_-20C",
     "178MC":  "ASI178MC/G0_0C",
     "Dwarf3_Wide": None,
     "Dwarf3_Tele": None

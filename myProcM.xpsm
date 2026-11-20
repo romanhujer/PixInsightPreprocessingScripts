@@ -3,9 +3,9 @@
 ********************************************************************
 PixInsight XML Process Serialization Module - XPSM 1.0
 ********************************************************************
-Generated on 2025-07-05T05:45:12.188Z
-PixInsight Core 1.9.3 (x64)
-Copyright (c) 2003-2025 Pleiades Astrophoto
+Generated on 2026-08-17T20:32:47.667Z
+PixInsight Core 1.9.4 (arm64)
+Copyright (c) 2003-2026 Pleiades Astrophoto
 ********************************************************************
 -->
 <xpsm version="1.0" xmlns="http://www.pixinsight.com/xpsm" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.pixinsight.com/xpsm http://pixinsight.com/xpsm/xpsm-1.0.xsd">
@@ -1108,11 +1108,15 @@ sin(max(0,ln(($T+(1/(exp(stretch)-1)))*(1-exp(-stretch)))/stretch+1)*pi()/2)^con
       <parameter id="weightKeyword"></parameter>
       <parameter id="csvWeightsFilePath"></parameter>
       <parameter id="weightScale" value="WeightScale_BWMV"/>
+      <parameter id="weightOvershootProtection" value="false"/>
+      <parameter id="weightOvershootThreshold" value="0.10"/>
+      <parameter id="weightOvershootLimit" value="0.95"/>
+      <parameter id="weightOvershootRemove" value="false"/>
       <parameter id="minWeight" value="0.005000"/>
       <parameter id="csvWeights"></parameter>
       <parameter id="adaptiveGridSize" value="16"/>
       <parameter id="adaptiveNoScale" value="false"/>
-      <parameter id="ignoreNoiseKeywords" value="false"/>
+      <parameter id="ignoreNoiseMetadata" value="false"/>
       <parameter id="normalization" value="AdditiveWithScaling"/>
       <parameter id="rejection" value="Rejection_ESD"/>
       <parameter id="rejectionNormalization" value="Scale"/>
@@ -1243,10 +1247,11 @@ sin(max(0,ln(($T+(1/(exp(stretch)-1)))*(1-exp(-stretch)))/stretch+1)*pi()/2)^con
       <parameter id="averageSNRIncrementRK" value="0.0000"/>
       <parameter id="averageSNRIncrementG" value="0.0000"/>
       <parameter id="averageSNRIncrementB" value="0.0000"/>
+      <parameter id="excludedIndexes"></parameter>
       <table id="imageData" rows="0"/>
    </instance>
    <instance class="PixelMath" version="256" id="MaskBlur_instance">
-      <time start="2024-07-29T09:49:34.819Z" span="0.2373048"/>
+      <time start="2026-08-17T20:05:57.944Z" span="0.10398996"/>
       <parameter id="expression">gconv($T,  //Image name
 
 7,         //sigma -  Increase to add more blur
@@ -2299,36 +2304,6 @@ L,a,b,</parameter>
       <parameter id="newImageSampleFormat" value="SameAsTarget"/>
       <table id="outputData" rows="0"/>
    </instance>
-   <instance class="PixelMath" version="256" id="AddMyStat_instance">
-      <time start="2024-07-29T10:10:51.707Z" span="0.3156229"/>
-      <parameter id="expression">~(~star*1.01 * ~ $T)</parameter>
-      <parameter id="expression1"></parameter>
-      <parameter id="expression2"></parameter>
-      <parameter id="expression3"></parameter>
-      <parameter id="useSingleExpression" value="true"/>
-      <parameter id="symbols"></parameter>
-      <parameter id="clearImageCacheAndExit" value="false"/>
-      <parameter id="cacheGeneratedImages" value="false"/>
-      <parameter id="generateOutput" value="true"/>
-      <parameter id="singleThreaded" value="false"/>
-      <parameter id="optimization" value="true"/>
-      <parameter id="use64BitWorkingImage" value="false"/>
-      <parameter id="rescale" value="false"/>
-      <parameter id="rescaleLower" value="0"/>
-      <parameter id="rescaleUpper" value="1"/>
-      <parameter id="truncate" value="true"/>
-      <parameter id="truncateLower" value="0"/>
-      <parameter id="truncateUpper" value="1"/>
-      <parameter id="createNewImage" value="false"/>
-      <parameter id="showNewImage" value="true"/>
-      <parameter id="newImageId"></parameter>
-      <parameter id="newImageWidth" value="0"/>
-      <parameter id="newImageHeight" value="0"/>
-      <parameter id="newImageAlpha" value="false"/>
-      <parameter id="newImageColorSpace" value="SameAsTarget"/>
-      <parameter id="newImageSampleFormat" value="SameAsTarget"/>
-      <table id="outputData" rows="0"/>
-   </instance>
    <instance class="ChannelCombination" version="256" id="iRGB_instance">
       <parameter id="colorSpace" value="RGB"/>
       <table id="channels" rows="3">
@@ -2455,6 +2430,7 @@ L,a,b,</parameter>
             <td id="image">i_B</td>
          </tr>
       </table>
+      <parameter id="targetCSVFilePath"></parameter>
       <parameter id="inputHints"></parameter>
       <parameter id="outputHints"></parameter>
       <parameter id="mode" value="RegisterMatch"/>
@@ -4385,7 +4361,7 @@ E1,E2,E3,E4,E5,E6,E7,</parameter>
       <parameter id="inheritAstrometricSolution" value="true"/>
    </instance>
    <instance class="BlurXTerminator" version="256" id="BluerX_instance">
-      <time start="2025-07-05T05:43:49.676Z" span="5.7053425"/>
+      <time start="2026-08-17T20:04:32.820Z" span="13.331902"/>
       <parameter id="ai_file">BlurXTerminator.4.mlpackage</parameter>
       <parameter id="correct_only" value="false"/>
       <parameter id="correct_first" value="false"/>
@@ -4404,6 +4380,7 @@ E1,E2,E3,E4,E5,E6,E7,</parameter>
       <parameter id="overlap" value="0.50"/>
    </instance>
    <instance class="NoiseXTerminator" version="256" id="Denoise_instance">
+      <time start="2026-08-17T20:24:50.137Z" span="10.601052"/>
       <parameter id="ai_file">NoiseXTerminator.3.mlpackage</parameter>
       <parameter id="enable_color_separation" value="false"/>
       <parameter id="enable_frequency_separation" value="false"/>
@@ -4416,11 +4393,205 @@ E1,E2,E3,E4,E5,E6,E7,</parameter>
       <parameter id="detail" value="0.15"/>
    </instance>
    <instance class="StarXTerminator" version="256" id="StarX_instance">
-      <time start="2025-07-05T05:29:27.195Z" span="13.64326"/>
+      <time start="2026-08-17T19:50:51.954Z" span="83.831196"/>
       <parameter id="ai_file">StarXTerminator.11.mlpackage</parameter>
       <parameter id="stars" value="false"/>
       <parameter id="unscreen" value="true"/>
       <parameter id="overlap" value="0.50"/>
+   </instance>
+   <instance class="PixelMath" version="256" id="AddMyStar_instance">
+      <description>My Add Star</description>
+      <parameter id="expression">~(~star * ~ $T)</parameter>
+      <parameter id="expression1"></parameter>
+      <parameter id="expression2"></parameter>
+      <parameter id="expression3"></parameter>
+      <parameter id="useSingleExpression" value="true"/>
+      <parameter id="symbols"></parameter>
+      <parameter id="clearImageCacheAndExit" value="false"/>
+      <parameter id="cacheGeneratedImages" value="false"/>
+      <parameter id="generateOutput" value="true"/>
+      <parameter id="singleThreaded" value="false"/>
+      <parameter id="optimization" value="true"/>
+      <parameter id="use64BitWorkingImage" value="false"/>
+      <parameter id="rescale" value="false"/>
+      <parameter id="rescaleLower" value="0"/>
+      <parameter id="rescaleUpper" value="1"/>
+      <parameter id="truncate" value="true"/>
+      <parameter id="truncateLower" value="0"/>
+      <parameter id="truncateUpper" value="1"/>
+      <parameter id="createNewImage" value="true"/>
+      <parameter id="showNewImage" value="true"/>
+      <parameter id="newImageId"></parameter>
+      <parameter id="newImageWidth" value="0"/>
+      <parameter id="newImageHeight" value="0"/>
+      <parameter id="newImageAlpha" value="false"/>
+      <parameter id="newImageColorSpace" value="SameAsTarget"/>
+      <parameter id="newImageSampleFormat" value="SameAsTarget"/>
+      <table id="outputData" rows="0"/>
+   </instance>
+   <instance class="ProcessContainer" id="ForBatchExtractL_instance">
+      <instance class="PixelMath" version="256" enabled="true">
+         <time start="2026-05-19T21:17:40.431Z" span="0.092565708"/>
+         <parameter id="expression">CIEL ($T)</parameter>
+         <parameter id="expression1"></parameter>
+         <parameter id="expression2"></parameter>
+         <parameter id="expression3"></parameter>
+         <parameter id="useSingleExpression" value="true"/>
+         <parameter id="symbols"></parameter>
+         <parameter id="clearImageCacheAndExit" value="false"/>
+         <parameter id="cacheGeneratedImages" value="false"/>
+         <parameter id="generateOutput" value="true"/>
+         <parameter id="singleThreaded" value="false"/>
+         <parameter id="optimization" value="true"/>
+         <parameter id="use64BitWorkingImage" value="false"/>
+         <parameter id="rescale" value="false"/>
+         <parameter id="rescaleLower" value="0"/>
+         <parameter id="rescaleUpper" value="1"/>
+         <parameter id="truncate" value="true"/>
+         <parameter id="truncateLower" value="0"/>
+         <parameter id="truncateUpper" value="1"/>
+         <parameter id="createNewImage" value="false"/>
+         <parameter id="showNewImage" value="true"/>
+         <parameter id="newImageId"></parameter>
+         <parameter id="newImageWidth" value="0"/>
+         <parameter id="newImageHeight" value="0"/>
+         <parameter id="newImageAlpha" value="false"/>
+         <parameter id="newImageColorSpace" value="Gray"/>
+         <parameter id="newImageSampleFormat" value="SameAsTarget"/>
+         <table id="outputData" rows="0"/>
+      </instance>
+      <instance class="ConvertToGrayscale" version="256" enabled="true">
+         <time start="2026-05-19T21:17:40.525Z" span="0.025363083"/>
+      </instance>
+   </instance>
+   <instance class="Invert" version="256" id="Invert_instance">
+      <time start="2026-08-17T20:32:06.307Z" span="0.01380975"/>
+   </instance>
+   <instance class="ProcessContainer" id="FixMgenta_instance">
+      <instance class="Invert" version="256" enabled="true"/>
+      <instance class="PixelMath" version="256" enabled="true">
+         <time start="2025-03-22T03:55:29.905Z" span="6.4665135"/>
+         <parameter id="expression">/*            Modified SCNR with Pixelmath -V5 
+      Pixelmath by Bill Blanshan - Concept by James Lamb       
+
+**Drag the bottom left arrow onto your image to process
+
+**This process provides better Luminance protection than
+  the standard SCNR process.  Special thanks to James Lamb
+  for providing us the concept                         */
+
+Amount= 0.95; //&lt;--Blend control      Hope you enjoy!!!
+
+
+
+
+
+
+
+
+
+
+
+
+   
+
+
+
+E1= $T[0]*.2126 + $T[1]*.7152 + $T[2]*0.0722; // Luminance
+E2=  min(mean($T[0],$T[2]),$T[1]); // Average Neutral Mask
+E3= $T[0]*.2126 + E2*.7152 + $T[2]*0.0722; //Luminance (Green Scaled)
+E4= iif($T==$T[0],$T[0],iif($T==$T[1],E2,$T[2])); // New RGB
+E5= E4*max(0.0000001,E1)/max(0.0000001,E3); //RGB with Lum
+((E5*Amount)+($T*~Amount))</parameter>
+         <parameter id="expression1"></parameter>
+         <parameter id="expression2"></parameter>
+         <parameter id="expression3"></parameter>
+         <parameter id="useSingleExpression" value="true"/>
+         <parameter id="symbols">Amount, E1,E2,E3,E4,E5,E6,E7,</parameter>
+         <parameter id="clearImageCacheAndExit" value="false"/>
+         <parameter id="cacheGeneratedImages" value="false"/>
+         <parameter id="generateOutput" value="true"/>
+         <parameter id="singleThreaded" value="false"/>
+         <parameter id="optimization" value="true"/>
+         <parameter id="use64BitWorkingImage" value="false"/>
+         <parameter id="rescale" value="false"/>
+         <parameter id="rescaleLower" value="0"/>
+         <parameter id="rescaleUpper" value="1"/>
+         <parameter id="truncate" value="true"/>
+         <parameter id="truncateLower" value="0"/>
+         <parameter id="truncateUpper" value="1"/>
+         <parameter id="createNewImage" value="false"/>
+         <parameter id="showNewImage" value="true"/>
+         <parameter id="newImageId"></parameter>
+         <parameter id="newImageWidth" value="0"/>
+         <parameter id="newImageHeight" value="0"/>
+         <parameter id="newImageAlpha" value="false"/>
+         <parameter id="newImageColorSpace" value="SameAsTarget"/>
+         <parameter id="newImageSampleFormat" value="SameAsTarget"/>
+         <table id="outputData" rows="0"/>
+      </instance>
+      <instance class="Invert" version="256" enabled="true"/>
+      <instance class="PixelMath" version="256" enabled="true">
+         <time start="2025-03-22T03:55:29.905Z" span="6.4665135"/>
+         <parameter id="expression">/*            Modified SCNR with Pixelmath -V5 
+      Pixelmath by Bill Blanshan - Concept by James Lamb       
+
+**Drag the bottom left arrow onto your image to process
+
+**This process provides better Luminance protection than
+  the standard SCNR process.  Special thanks to James Lamb
+  for providing us the concept                         */
+
+Amount= 0.95; //&lt;--Blend control      Hope you enjoy!!!
+
+
+
+
+
+
+
+
+
+
+
+
+   
+
+
+
+E1= $T[0]*.2126 + $T[1]*.7152 + $T[2]*0.0722; // Luminance
+E2=  min(mean($T[0],$T[2]),$T[1]); // Average Neutral Mask
+E3= $T[0]*.2126 + E2*.7152 + $T[2]*0.0722; //Luminance (Green Scaled)
+E4= iif($T==$T[0],$T[0],iif($T==$T[1],E2,$T[2])); // New RGB
+E5= E4*max(0.0000001,E1)/max(0.0000001,E3); //RGB with Lum
+((E5*Amount)+($T*~Amount))</parameter>
+         <parameter id="expression1"></parameter>
+         <parameter id="expression2"></parameter>
+         <parameter id="expression3"></parameter>
+         <parameter id="useSingleExpression" value="true"/>
+         <parameter id="symbols">Amount, E1,E2,E3,E4,E5,E6,E7,</parameter>
+         <parameter id="clearImageCacheAndExit" value="false"/>
+         <parameter id="cacheGeneratedImages" value="false"/>
+         <parameter id="generateOutput" value="true"/>
+         <parameter id="singleThreaded" value="false"/>
+         <parameter id="optimization" value="true"/>
+         <parameter id="use64BitWorkingImage" value="false"/>
+         <parameter id="rescale" value="false"/>
+         <parameter id="rescaleLower" value="0"/>
+         <parameter id="rescaleUpper" value="1"/>
+         <parameter id="truncate" value="true"/>
+         <parameter id="truncateLower" value="0"/>
+         <parameter id="truncateUpper" value="1"/>
+         <parameter id="createNewImage" value="false"/>
+         <parameter id="showNewImage" value="true"/>
+         <parameter id="newImageId"></parameter>
+         <parameter id="newImageWidth" value="0"/>
+         <parameter id="newImageHeight" value="0"/>
+         <parameter id="newImageAlpha" value="false"/>
+         <parameter id="newImageColorSpace" value="SameAsTarget"/>
+         <parameter id="newImageSampleFormat" value="SameAsTarget"/>
+         <table id="outputData" rows="0"/>
+      </instance>
    </instance>
    <icon id="ModifiedSCNR_v5" instance="ModifiedSCNR_v5_instance" xpos="376" ypos="160" workspace="Workspace01"/>
    <icon id="Bills_Stretch_Llinked__V4" instance="Bills_Stretch_Llinked__V4_instance" xpos="376" ypos="96" workspace="Workspace01"/>
@@ -4450,7 +4621,6 @@ E1,E2,E3,E4,E5,E6,E7,</parameter>
    <icon id="Ha_to_RGB_Nebula_Simple_V1" instance="Ha_to_RGB_Nebula_Simple_V1_instance" xpos="1536" ypos="64" workspace="Workspace01"/>
    <icon id="CloneForStarless_RGB_" instance="CloneForStarless_RGB__instance" xpos="1536" ypos="136" workspace="Workspace01"/>
    <icon id="Ha_to_RGB_Advanced_V1" instance="Ha_to_RGB_Advanced_V1_instance" xpos="1536" ypos="104" workspace="Workspace01"/>
-   <icon id="AddMyStat" instance="AddMyStat_instance" xpos="576" ypos="168" workspace="Workspace01"/>
    <icon id="iRGB" instance="iRGB_instance" xpos="368" ypos="232" workspace="Workspace01"/>
    <icon id="zSHO" instance="zSHO_instance" xpos="608" ypos="240" workspace="Workspace01"/>
    <icon id="GRGB" instance="GRGB_instance" xpos="720" ypos="240" workspace="Workspace01"/>
@@ -4462,4 +4632,8 @@ E1,E2,E3,E4,E5,E6,E7,</parameter>
    <icon id="SarXX" instance="SarXX_instance" xpos="288" ypos="64" workspace="Workspace01"/>
    <icon id="Denoise" instance="Denoise_instance" xpos="288" ypos="112" workspace="Workspace01"/>
    <icon id="StarX" instance="StarX_instance" xpos="208" ypos="56" workspace="Workspace01"/>
+   <icon id="AddMyStar" instance="AddMyStar_instance" xpos="600" ypos="168" workspace="Workspace01"/>
+   <icon id="ForBatchExtractL" instance="ForBatchExtractL_instance" xpos="96" ypos="232" workspace="Workspace01"/>
+   <icon id="Invert" instance="Invert_instance" xpos="768" ypos="144" workspace="Workspace01"/>
+   <icon id="FixMgenta" instance="FixMgenta_instance" xpos="256" ypos="192" workspace="Workspace01"/>
 </xpsm>
